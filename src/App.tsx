@@ -29,13 +29,24 @@ function regionFromUrl(): string {
   return REGIONS[0].key;
 }
 
+/** Gibt es (noch) ein Verteil-Gebiet? Bestimmt den Start-Modus der Werkzeuge. */
+function hasAreas(evs: DemoEvent[]): boolean {
+  const dissolved = new Set(
+    evs.filter((e) => e.t === "area_dissolved").map((e) => (e as { areaId: string }).areaId)
+  );
+  return evs.some((e) => e.t === "area_created" && !dissolved.has(e.id));
+}
+
+/** Erst das eigene Gebiet einkringeln — Häuser markieren kommt danach. */
+const defaultTool = (evs: DemoEvent[]): Tool => (hasAreas(evs) ? "select" : "lasso");
+
 export default function App() {
   const [regionKey, setRegionKey] = useState<string>(regionFromUrl);
   const region = REGIONS.find((r) => r.key === regionKey) ?? REGIONS[0];
   const [buildingsFC, setBuildingsFC] = useState<any | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [events, setEvents] = useState<DemoEvent[]>(() => loadEvents(regionFromUrl()));
-  const [tool, setTool] = useState<Tool>("select");
+  const [tool, setTool] = useState<Tool>(() => defaultTool(loadEvents(regionFromUrl())));
   const [selection, setSelection] = useState<Selection | null>(null);
   const [popup, setPopup] = useState<PopupState | null>(null);
   const [focusArea, setFocusArea] = useState<{ id: string; ts: number } | null>(null);
@@ -71,7 +82,7 @@ export default function App() {
     setSelection(null);
     setPopup(null);
     setCelebration(null);
-    setTool("select");
+    setTool(defaultTool(loadEvents(key)));
     // Adresse mitführen: Hamburg-Link ist teilbar (…/#hh)
     history.replaceState(null, "", key === "hamburg" ? "#hh" : location.pathname + location.search);
   };
@@ -126,6 +137,7 @@ export default function App() {
       setEvents([]);
       setPopup(null);
       setSelection(null);
+      setTool("lasso"); // ohne Gebiete: wieder mit dem Einkringeln beginnen
     }
   };
 
@@ -237,6 +249,7 @@ export default function App() {
         buildingIds: finalIds,
       });
       dispatch(...evs);
+      setTool("select"); // Gebiet steht — jetzt Häuser markieren
     }
     setSelection(null);
   };
@@ -387,7 +400,11 @@ export default function App() {
               buildings={buildings}
               derived={derived}
               defaultName={`Gebiet ${events.filter((e) => e.t === "area_created").length + 1}`}
-              onCancel={() => setSelection(null)}
+              onCancel={() => {
+                setSelection(null);
+                // noch kein Gebiet vorhanden → zurück in den Zeichenmodus
+                if (derived.areas.length === 0) setTool("lasso");
+              }}
               onCreate={createArea}
             />
           )}
