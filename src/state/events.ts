@@ -13,7 +13,8 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
   >();
   const assign = new Map<number, string>(); // Gebäude → Gebiet (letzte Zuteilung gewinnt)
   const ergebnis = new Map<number, "v" | "g">();
-  const nz = new Set<number>();
+  const nz = new Set<number>(); // Kennzeichen: Haus bleibt in der Zählbasis
+  const nzComment = new Map<number, string>();
 
   for (const e of events) {
     switch (e.t) {
@@ -56,53 +57,67 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
           case "verteilt":
             ergebnis.set(e.buildingId, "v");
             nz.delete(e.buildingId);
+            nzComment.delete(e.buildingId);
             break;
           case "gesprochen":
             ergebnis.set(e.buildingId, "g");
             nz.delete(e.buildingId);
+            nzComment.delete(e.buildingId);
             break;
           case "offen":
             ergebnis.delete(e.buildingId);
             nz.delete(e.buildingId);
+            nzComment.delete(e.buildingId);
             break;
           case "nicht_zustellbar":
             nz.add(e.buildingId);
             ergebnis.delete(e.buildingId);
+            if (e.comment !== undefined) {
+              const c = e.comment.trim();
+              if (c) nzComment.set(e.buildingId, c);
+              else nzComment.delete(e.buildingId);
+            }
             break;
           case "zustellbar":
             nz.delete(e.buildingId);
+            nzComment.delete(e.buildingId);
             break;
         }
         break;
     }
   }
 
-  // Kategorie je Gebäude (nur Abweichungen vom Standard 'u')
+  // Anzeige-Kategorie je Gebäude (nur Abweichungen vom Standard 'u');
+  // 'n' übersteuert nur die FARBE — gezählt wird das Haus weiterhin normal
   const cat = new Map<number, Cat>();
   for (const b of nz) cat.set(b, "n");
   for (const [b, v] of ergebnis) {
     if (!nz.has(b)) cat.set(b, v);
   }
-  for (const [b, aid] of assign) {
+  const isAssigned = (b: number): boolean => {
+    const a = areas.get(assign.get(b) ?? "");
+    return !!a && !!a.distributorId;
+  };
+  for (const [b] of assign) {
     if (cat.has(b)) continue;
-    const a = areas.get(aid);
-    if (a && a.distributorId) cat.set(b, "z"); // zugeteilt nur, wenn wirklich jemandem zugeordnet
+    if (isAssigned(b)) cat.set(b, "z"); // zugeteilt nur, wenn wirklich jemandem zugeordnet
   }
 
+  // Zählung: nicht_zustellbar nimmt NICHTS aus der Zählbasis — das Haus zählt
+  // nach seinem Grundzustand weiter (zugeteilt oder unerreicht)
   let z = 0, v = 0, g = 0;
-  for (const c of cat.values()) {
-    if (c === "z") z++;
-    else if (c === "v") v++;
+  for (const [b, c] of cat) {
+    if (c === "v") v++;
     else if (c === "g") g++;
+    else if (c === "z") z++;
+    else if (c === "n" && isAssigned(b)) z++;
   }
-  const total = Math.max(0, buildings.size - nz.size);
+  const total = buildings.size;
   const counts = { z, v, g, nz: nz.size, total, u: Math.max(0, total - z - v - g) };
 
-  // effektive Mitglieder je Gebiet — ohne nicht_zustellbare Häuser,
-  // damit der Gebietsfortschritt zur Zählbasis konsistent bleibt (100 % erreichbar)
+  // effektive Mitglieder je Gebiet (nicht_zustellbare Häuser bleiben offene Aufgabe)
   const members = new Map<string, number[]>();
   for (const [b, aid] of assign) {
-    if (nz.has(b)) continue;
     let arr = members.get(aid);
     if (!arr) {
       arr = [];
@@ -119,7 +134,7 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
     return { ...a, memberIds: m, done };
   });
 
-  return { distributors: [...dists.values()], areas: areaViews, cat, assignedArea: assign, counts };
+  return { distributors: [...dists.values()], areas: areaViews, cat, assignedArea: assign, nzComment, counts };
 }
 
 /** Farbpalette für Verteiler (bewusst getrennt von den Statusfarben) */
@@ -176,6 +191,7 @@ export function sanitizeEvents(raw: unknown): DemoEvent[] | null {
         break;
       case "building_status":
         if (typeof ev.buildingId !== "number" || !STATUS_VALUES.has(ev.status as string)) return null;
+        if (ev.comment !== undefined && (typeof ev.comment !== "string" || ev.comment.length > 500)) return null;
         break;
       default:
         return null;

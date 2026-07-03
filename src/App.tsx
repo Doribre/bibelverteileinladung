@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Building, Cat, DemoEvent, Ring } from "./types";
+import { REGIONS } from "./types";
 import { derive, newId, nextColor, sanitizeEvents } from "./state/events";
 import { loadEvents, saveEvents } from "./state/storage";
+import { randomEncouragement } from "./encouragements";
+import { bling } from "./sound";
 import KpiBar from "./components/KpiBar";
 import MapView, { type Tool } from "./components/MapView";
 import Sidebar from "./components/Sidebar";
 import AreaDialog from "./components/AreaDialog";
 import StatusPopup from "./components/StatusPopup";
+import Celebration, { type CelebrationData } from "./components/Celebration";
 
 interface Selection {
   ids: number[];
@@ -19,32 +23,59 @@ interface PopupState {
 }
 
 export default function App() {
+  const [regionKey, setRegionKey] = useState<string>(REGIONS[0].key);
+  const region = REGIONS.find((r) => r.key === regionKey) ?? REGIONS[0];
   const [buildingsFC, setBuildingsFC] = useState<any | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [events, setEvents] = useState<DemoEvent[]>(() => loadEvents());
+  const [events, setEvents] = useState<DemoEvent[]>(() => loadEvents(REGIONS[0].key));
   const [tool, setTool] = useState<Tool>("select");
   const [selection, setSelection] = useState<Selection | null>(null);
   const [popup, setPopup] = useState<PopupState | null>(null);
   const [focusArea, setFocusArea] = useState<{ id: string; ts: number } | null>(null);
+  const [celebration, setCelebration] = useState<CelebrationData | null>(null);
+  const [flash, setFlash] = useState<{ id: number; ts: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Gebäudedaten (Pilotgebiet) laden
+  // Gebäudedaten des gewählten Gebiets laden
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}data/buildings.geojson`)
+    let cancelled = false;
+    setBuildingsFC(null);
+    setLoadError(null);
+    fetch(`${import.meta.env.BASE_URL}data/${region.file}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
-      .then(setBuildingsFC)
-      .catch((e) => setLoadError(String(e)));
-  }, []);
+      .then((fc) => {
+        if (!cancelled) setBuildingsFC(fc);
+      })
+      .catch((e) => {
+        if (!cancelled) setLoadError(String(e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [region.file]);
+
+  const switchRegion = (key: string) => {
+    if (key === regionKey) return;
+    setRegionKey(key);
+    setEvents(loadEvents(key));
+    setSelection(null);
+    setPopup(null);
+    setCelebration(null);
+    setTool("select");
+  };
 
   const buildings = useMemo(() => {
     const m = new Map<number, Building>();
     if (buildingsFC) {
       for (const f of buildingsFC.features) {
         const p = f.properties;
-        m.set(p.id, { id: p.id, street: p.street, hnr: p.hnr, plz: p.plz, c: p.c });
+        // Polygone tragen den Schwerpunkt als Property, Punkte direkt in der Geometrie
+        const c = p.c ?? (f.geometry.type === "Point" ? f.geometry.coordinates : null);
+        if (!c) continue;
+        m.set(p.id, { id: p.id, street: p.street, hnr: p.hnr, plz: p.plz ?? "", c });
       }
     }
     return m;
@@ -52,7 +83,7 @@ export default function App() {
 
   const derived = useMemo(() => derive(events, buildings), [events, buildings]);
 
-  useEffect(() => saveEvents(events), [events]);
+  useEffect(() => saveEvents(regionKey, events), [regionKey, events]);
 
   // Events eines Aufrufs teilen eine Aktionsgruppe — Undo nimmt die ganze Gruppe zurück
   const dispatch = (...evs: DemoEvent[]) => {
@@ -75,7 +106,7 @@ export default function App() {
   };
 
   const reset = () => {
-    if (confirm("Demo wirklich zurücksetzen? Alle Markierungen, Gebiete und Namen gehen verloren.")) {
+    if (confirm(`Demo für „${region.name}" wirklich zurücksetzen? Alle Markierungen, Gebiete und Namen dieses Gebiets gehen verloren.`)) {
       setEvents([]);
       setPopup(null);
       setSelection(null);
@@ -85,14 +116,15 @@ export default function App() {
   const exportState = () => {
     const payload = {
       app: "bibelverteilung-demo",
-      version: 1,
+      version: 2,
+      region: regionKey,
       exportedAt: new Date().toISOString(),
       events,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "bibelverteilung-demo-stand.json";
+    a.download = `bibelverteil-plan-${regionKey}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   };
@@ -103,13 +135,19 @@ export default function App() {
       .then((txt) => {
         const p = JSON.parse(txt);
         const evs = p ? sanitizeEvents(p.events) : null;
-        if (evs) {
-          setEvents(evs);
-          setPopup(null);
-          setSelection(null);
-        } else {
-          alert("Datei nicht erkannt oder beschädigt — es wird ein unveränderter Export dieser Demo erwartet.");
+        if (!evs) {
+          alert("Datei nicht erkannt oder beschädigt — es wird ein unveränderter Export dieser Anwendung erwartet.");
+          return;
         }
+        const fileRegion: string = typeof p.region === "string" ? p.region : "badgodesberg";
+        if (fileRegion !== regionKey) {
+          const r = REGIONS.find((x) => x.key === fileRegion);
+          alert(`Diese Datei gehört zum Gebiet „${r?.name ?? fileRegion}" — bitte oben zuerst das Gebiet umschalten und dann erneut importieren.`);
+          return;
+        }
+        setEvents(evs);
+        setPopup(null);
+        setSelection(null);
       })
       .catch(() => alert("Datei konnte nicht gelesen werden."));
   };
@@ -123,9 +161,20 @@ export default function App() {
 
   const onBuildingClick = (id: number, x: number, y: number) => setPopup({ buildingId: id, x, y });
 
-  const setStatus = (status: "verteilt" | "gesprochen" | "offen" | "nicht_zustellbar" | "zustellbar") => {
+  const setStatus = (
+    status: "verteilt" | "gesprochen" | "offen" | "nicht_zustellbar" | "zustellbar",
+    comment?: string
+  ) => {
     if (!popup) return;
-    dispatch({ t: "building_status", buildingId: popup.buildingId, status });
+    const ev: DemoEvent = { t: "building_status", buildingId: popup.buildingId, status };
+    if (comment !== undefined) ev.comment = comment;
+    dispatch(ev);
+    // Loot-Box-Moment: Blinken + Funken + Bling + Ermutigung
+    if (status === "verteilt" || status === "gesprochen") {
+      bling();
+      setFlash({ id: popup.buildingId, ts: Date.now() });
+      setCelebration({ id: newId("c"), x: popup.x, y: popup.y, message: randomEncouragement() });
+    }
     setPopup(null);
   };
 
@@ -162,7 +211,6 @@ export default function App() {
     setSelection(null);
   };
 
-  // Popup-Daten ableiten
   const popupData = useMemo(() => {
     if (!popup) return null;
     const b = buildings.get(popup.buildingId);
@@ -173,7 +221,12 @@ export default function App() {
       ? derived.distributors.find((d) => d.id === area.distributorId)
       : undefined;
     const label = area ? `${area.name}${dist ? " · " + dist.name : ""}` : null;
-    return { b, cat: (derived.cat.get(popup.buildingId) ?? "u") as Cat, label };
+    return {
+      b,
+      cat: (derived.cat.get(popup.buildingId) ?? "u") as Cat,
+      label,
+      nzComment: derived.nzComment.get(popup.buildingId) ?? null,
+    };
   }, [popup, buildings, derived]);
 
   // Test-/Demo-Haken für programmatische Bedienung (nur Entwicklung/Verifikation)
@@ -181,6 +234,7 @@ export default function App() {
     (window as any).__demo = {
       counts: derived.counts,
       eventCount: events.length,
+      region: regionKey,
       dispatch: (e: DemoEvent) => dispatch(e),
       buildingIds: () => [...buildings.keys()],
       selectRect: (w: number, s: number, e2: number, n: number) => {
@@ -198,14 +252,26 @@ export default function App() {
     <div className="app">
       <header>
         <div className="titlebar">
-          <div>
-            <strong>Bibelverteilung – Demonstrator</strong>
+          <div className="title-block">
+            <strong>Schau in die Bibel / Bibel TV NEXT MISSION Bibelverteil-Plan</strong>
             <span className="subtitle">
-              Pilotgebiet Bonn-Bad Godesberg
-              {buildings.size > 0 && <> · {buildings.size.toLocaleString("de-DE")} Häuser</>}
+              Markiere das Gebiet, in dem du verteilen möchtest, schreib deinen Namen dazu — und
+              markiere dann jedes Haus, das schon eine Bibel bekommen hat.
             </span>
           </div>
           <div className="actions">
+            <select
+              className="region-select"
+              value={regionKey}
+              onChange={(e) => switchRegion(e.target.value)}
+              title="Verteilgebiet wählen"
+            >
+              {REGIONS.map((r) => (
+                <option key={r.key} value={r.key}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
             <button onClick={undo} disabled={events.length === 0}>↶ Rückgängig</button>
             <button onClick={exportState} disabled={events.length === 0}>Export</button>
             <button onClick={() => fileInputRef.current?.click()}>Import</button>
@@ -229,10 +295,12 @@ export default function App() {
         <div className="map-wrap">
           {loadError && (
             <div className="load-overlay">
-              Gebäudedaten konnten nicht geladen werden ({loadError}). Bitte zuerst „npm run data" ausführen.
+              Gebäudedaten für {region.name} konnten nicht geladen werden ({loadError}).
             </div>
           )}
-          {!buildingsFC && !loadError && <div className="load-overlay">Lade Gebäude …</div>}
+          {!buildingsFC && !loadError && (
+            <div className="load-overlay">Lade Häuser für {region.name} …</div>
+          )}
           <MapView
             buildingsFC={buildingsFC}
             cat={derived.cat}
@@ -242,6 +310,7 @@ export default function App() {
             setTool={setTool}
             selectionIds={selection?.ids ?? null}
             focusArea={focusArea}
+            flash={flash}
             onSelection={onSelection}
             onBuildingClick={onBuildingClick}
             onBackgroundClick={() => setPopup(null)}
@@ -251,12 +320,14 @@ export default function App() {
               building={popupData.b}
               cat={popupData.cat}
               areaLabel={popupData.label}
+              nzComment={popupData.nzComment}
               x={popup.x}
               y={popup.y}
               onSet={setStatus}
               onClose={() => setPopup(null)}
             />
           )}
+          {celebration && <Celebration data={celebration} onDone={() => setCelebration(null)} />}
           {selection && (
             <AreaDialog
               selection={selection}

@@ -17,7 +17,8 @@ export default function KpiBar({ counts }: { counts: Counts }) {
         <div className="kpi-item" key={it.label}>
           <i style={{ background: it.color }} />
           <div>
-            <div className="num">{it.value.toLocaleString("de-DE")}</div>
+            {/* key = Wert: bei jeder Änderung wird das Element neu aufgebaut → Puls-Animation */}
+            <div className="num" key={it.value}>{it.value.toLocaleString("de-DE")}</div>
             <div className="lbl">{it.label}</div>
           </div>
         </div>

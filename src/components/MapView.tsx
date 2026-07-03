@@ -16,12 +16,32 @@ interface Props {
   setTool: (t: Tool) => void;
   selectionIds: number[] | null;
   focusArea: { id: string; ts: number } | null;
+  /** Loot-Box-Blinken des zuletzt markierten Hauses */
+  flash: { id: number; ts: number } | null;
   onSelection: (ids: number[], polygon: Ring) => void;
   onBuildingClick: (id: number, x: number, y: number) => void;
   onBackgroundClick: () => void;
 }
 
 const EMPTY_FC: any = { type: "FeatureCollection", features: [] };
+
+// Statusfarbe mit Blink-Übersteuerung (feature-state "flash")
+const COLOR_EXPR: any = [
+  "case",
+  ["boolean", ["feature-state", "flash"], false],
+  "#ffe066",
+  [
+    "match",
+    ["coalesce", ["feature-state", "cat"], "u"],
+    "z", CAT_COLORS.z,
+    "v", CAT_COLORS.v,
+    "g", CAT_COLORS.g,
+    "n", CAT_COLORS.n,
+    CAT_COLORS.u,
+  ],
+];
+
+const SEL_COLOR: any = ["case", ["boolean", ["feature-state", "sel"], false], "#0369a1", "#334155"];
 
 export default function MapView(props: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -94,13 +114,17 @@ export default function MapView(props: Props) {
       if (src) src.setData(EMPTY_FC);
     };
 
+    // Mittelpunkt eines Features (Polygon: Schwerpunkt-Property, Punkt: Geometrie)
+    const centerOf = (f: any): [number, number] | null =>
+      f.properties.c ?? (f.geometry.type === "Point" ? f.geometry.coordinates : null);
+
     // Gebäude mit Schwerpunkt in der Fläche (Mittelpunkt-Regel)
     const computeIds = (ring: Ring): number[] => {
       const [minX, minY, maxX, maxY] = ringBbox(ring);
       const ids: number[] = [];
       for (const f of propsRef.current.buildingsFC?.features ?? []) {
-        const c = f.properties.c as [number, number];
-        if (c[0] < minX || c[0] > maxX || c[1] < minY || c[1] > maxY) continue;
+        const c = centerOf(f);
+        if (!c || c[0] < minX || c[0] > maxX || c[1] < minY || c[1] > maxY) continue;
         if (pointInPolygon(c, ring)) ids.push(f.properties.id as number);
       }
       return ids;
@@ -183,7 +207,7 @@ export default function MapView(props: Props) {
 
     map.on("mousemove", (e) => {
       if (propsRef.current.tool !== "select" || !map.getLayer("bld-fill")) return;
-      const feats = map.queryRenderedFeatures(e.point, { layers: ["bld-fill"] });
+      const feats = map.queryRenderedFeatures(e.point, { layers: ["bld-fill", "bld-point"] });
       map.getCanvas().style.cursor = feats.length > 0 ? "pointer" : "";
     });
 
@@ -196,7 +220,7 @@ export default function MapView(props: Props) {
         return;
       }
       if (t !== "select" || !map.getLayer("bld-fill")) return;
-      const feats = map.queryRenderedFeatures(e.point, { layers: ["bld-fill"] });
+      const feats = map.queryRenderedFeatures(e.point, { layers: ["bld-fill", "bld-point"] });
       if (feats.length > 0) {
         propsRef.current.onBuildingClick(Number(feats[0].id), e.point.x, e.point.y);
       } else {
@@ -271,60 +295,107 @@ export default function MapView(props: Props) {
     };
   }, []);
 
-  // Gebäude-Schicht hinzufügen, sobald Style und Daten bereit sind
+  // Gebäude-Schicht hinzufügen bzw. beim Gebietswechsel austauschen
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !styleReady || !props.buildingsFC || map.getSource("bld")) return;
-    map.addSource("bld", { type: "geojson", data: props.buildingsFC, promoteId: "id" });
-    map.addLayer(
-      {
-        id: "bld-fill",
-        type: "fill",
-        source: "bld",
-        paint: {
-          "fill-color": [
-            "match",
-            ["coalesce", ["feature-state", "cat"], "u"],
-            "z", CAT_COLORS.z,
-            "v", CAT_COLORS.v,
-            "g", CAT_COLORS.g,
-            "n", CAT_COLORS.n,
-            CAT_COLORS.u,
-          ],
-          "fill-opacity": 0.8,
+    if (!map || !styleReady || !props.buildingsFC) return;
+    const existing = map.getSource("bld") as maplibregl.GeoJSONSource | undefined;
+    if (existing) {
+      // Gebietswechsel: Daten tauschen, alle Feature-Zustände verwerfen
+      map.removeFeatureState({ source: "bld" });
+      prevCat.current = new Map();
+      prevSel.current = new Set();
+      existing.setData(props.buildingsFC);
+    } else {
+      map.addSource("bld", { type: "geojson", data: props.buildingsFC, promoteId: "id" });
+      // Polygone (Bad Godesberg) …
+      map.addLayer(
+        {
+          id: "bld-fill",
+          type: "fill",
+          source: "bld",
+          filter: ["==", ["geometry-type"], "Polygon"],
+          paint: { "fill-color": COLOR_EXPR, "fill-opacity": 0.8 },
         },
-      },
-      "areas-fill"
-    );
-    map.addLayer(
-      {
-        id: "bld-line",
-        type: "line",
-        source: "bld",
-        paint: {
-          "line-color": [
-            "case",
-            ["boolean", ["feature-state", "sel"], false],
-            "#0369a1",
-            "#334155",
-          ],
-          "line-width": ["case", ["boolean", ["feature-state", "sel"], false], 2.5, 0.4],
+        "areas-fill"
+      );
+      map.addLayer(
+        {
+          id: "bld-line",
+          type: "line",
+          source: "bld",
+          filter: ["==", ["geometry-type"], "Polygon"],
+          paint: {
+            "line-color": SEL_COLOR,
+            "line-width": ["case", ["boolean", ["feature-state", "sel"], false], 2.5, 0.4],
+          },
         },
-      },
-      "areas-fill"
-    );
-    // auf Datenausdehnung zoomen
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const f of props.buildingsFC.features) {
-      const [x, y] = f.properties.c;
-      if (x < minX) minX = x;
-      if (x > maxX) maxX = x;
-      if (y < minY) minY = y;
-      if (y > maxY) maxY = y;
+        "areas-fill"
+      );
+      // … und Punkte (großflächige Gebiete wie Hamburg)
+      map.addLayer(
+        {
+          id: "bld-point",
+          type: "circle",
+          source: "bld",
+          filter: ["==", ["geometry-type"], "Point"],
+          paint: {
+            "circle-color": COLOR_EXPR,
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 1, 12, 2, 14, 3.5, 17, 8],
+            "circle-stroke-width": ["case", ["boolean", ["feature-state", "sel"], false], 2, 0.3],
+            "circle-stroke-color": SEL_COLOR,
+          },
+        },
+        "areas-fill"
+      );
     }
-    if (minX < maxX) map.fitBounds([[minX, minY], [maxX, maxY]], { padding: 40, duration: 0 });
+    // auf Datenausdehnung zoomen — über 0,5 %-Quantile, damit einzelne Ausreißer
+    // (z. B. Hamburgs Nordsee-Insel Neuwerk) den Ausschnitt nicht aufziehen
+    const xs: number[] = [], ys: number[] = [];
+    for (const f of props.buildingsFC.features) {
+      const c = f.properties.c ?? (f.geometry.type === "Point" ? f.geometry.coordinates : null);
+      if (!c) continue;
+      xs.push(c[0]);
+      ys.push(c[1]);
+    }
+    if (xs.length > 1) {
+      xs.sort((a, b) => a - b);
+      ys.sort((a, b) => a - b);
+      const q = (arr: number[], p: number) => arr[Math.max(0, Math.min(arr.length - 1, Math.round(p * (arr.length - 1))))];
+      map.fitBounds(
+        [[q(xs, 0.005), q(ys, 0.005)], [q(xs, 0.995), q(ys, 0.995)]],
+        { padding: 40, duration: 0 }
+      );
+    }
     setBldReady(true);
   }, [styleReady, props.buildingsFC]);
+
+  // Loot-Box-Blinken: markiertes Haus 3× aufleuchten lassen
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !bldReady || !props.flash) return;
+    const id = props.flash.id;
+    const timers: number[] = [];
+    for (let i = 0; i < 7; i++) {
+      timers.push(
+        window.setTimeout(() => {
+          try {
+            map.setFeatureState({ source: "bld", id }, { flash: i % 2 === 0 });
+          } catch {
+            /* Quelle ggf. gerade getauscht */
+          }
+        }, i * 160)
+      );
+    }
+    return () => {
+      timers.forEach(clearTimeout);
+      try {
+        map.setFeatureState({ source: "bld", id }, { flash: false });
+      } catch {
+        /* s. o. */
+      }
+    };
+  }, [props.flash, bldReady]);
 
   // Status-Farben aktualisieren (nur Differenzen)
   useEffect(() => {

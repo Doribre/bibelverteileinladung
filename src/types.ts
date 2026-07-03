@@ -33,6 +33,8 @@ type DemoEventBase =
       t: "building_status";
       buildingId: number;
       status: "verteilt" | "gesprochen" | "offen" | "nicht_zustellbar" | "zustellbar";
+      /** nur bei nicht_zustellbar: Logistik-Notiz zum Gebäude (z. B. "Baustelle") */
+      comment?: string;
     };
 
 /** g = Aktionsgruppe: Events eines Klicks teilen eine Gruppe, Undo nimmt die ganze Gruppe zurück */
@@ -60,6 +62,7 @@ export interface Counts {
   z: number;
   v: number;
   g: number;
+  /** Info-Zähler: nicht_zustellbar ist ein Kennzeichen, die Häuser bleiben in der Zählbasis */
   nz: number;
   total: number;
 }
@@ -67,11 +70,25 @@ export interface Counts {
 export interface Derived {
   distributors: Distributor[];
   areas: AreaView[];
-  /** nur Einträge ungleich 'u' (Standard) */
+  /** Anzeige-Kategorie je Gebäude, nur Einträge ungleich 'u' (Standard) */
   cat: Map<number, Cat>;
   assignedArea: Map<number, string>;
+  /** Logistik-Notizen der nicht_zustellbaren Häuser */
+  nzComment: Map<number, string>;
   counts: Counts;
 }
+
+/** Wählbare Verteilgebiete (Stufe 1: statische Datendateien) */
+export interface Region {
+  key: string;
+  name: string;
+  file: string;
+}
+
+export const REGIONS: Region[] = [
+  { key: "badgodesberg", name: "Bonn-Bad Godesberg", file: "badgodesberg.geojson" },
+  { key: "hamburg", name: "Hamburg (ganze Stadt)", file: "hamburg.geojson" },
+];
 
 export const CAT_COLORS: Record<Cat, string> = {
   u: "#9ca3af",

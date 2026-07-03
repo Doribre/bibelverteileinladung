@@ -1,8 +1,11 @@
-# Bibelverteilung – Demonstrator (Stufe 1)
+# Schau in die Bibel / Bibel TV NEXT MISSION Bibelverteil-Plan
 
-Koordinations-Website für die Bibelverteilaktion, Ausbaustufe 1 nach
-[Konzept v2](../Bibelverteilaktion-Konzept-v2.md): läuft komplett im Browser,
-ohne Backend und ohne Login. Pilotgebiet: **Bonn-Bad Godesberg**.
+Koordinations-Website für die Bibelverteilaktion (Demonstrator, Stufe 1 nach
+Konzept v2): läuft komplett im Browser, ohne Backend und ohne Login.
+Gebiete: **Bonn-Bad Godesberg** (Gebäudeumrisse) und **Hamburg** (ganze Stadt,
+Gebäudemittelpunkte), umschaltbar in der Kopfzeile.
+
+Live: https://doribre.github.io/bibelverteileinladung/
 
 ## Bedienung
 
@@ -14,16 +17,21 @@ ohne Backend und ohne Login. Pilotgebiet: **Bonn-Bad Godesberg**.
 - **Verteiler:** frei wählbare Namen, existieren nur in der Browser-Sitzung
   (Demonstrator — später ersetzt durch Bibel TV Login, PS#0001).
 - **Haus anklicken** (Werkzeug „Auswählen"): Status setzen — Verteilt, Persönlich
-  gesprochen, Zurücksetzen, Nicht zustellbar.
-- **Export/Import:** kompletter Demo-Stand als JSON-Datei (Ereignisprotokoll).
+  gesprochen, Zurücksetzen, Nicht zustellbar (mit Gebäude-Notiz; Häuser bleiben
+  in der Zählung).
+- **Gamification:** Beim Markieren blinkt das Haus, Funken sprühen, ein kurzer
+  Glockenklang ertönt und eine von 30 überkonfessionellen Ermutigungen erscheint;
+  die Zähler pulsieren bei jeder Änderung.
+- **Export/Import:** kompletter Stand je Gebiet als JSON-Datei (Ereignisprotokoll).
 
 ## Entwicklung
 
 ```bash
 npm install
-npm run data   # Gebäudedaten von Overpass laden (public/data/buildings.geojson)
-npm run dev    # Dev-Server auf http://localhost:5173
-npm run build  # Produktions-Build nach dist/
+npm run data                              # Bad Godesberg laden (Polygone)
+node pipeline/fetch-buildings.mjs hamburg # Hamburg laden (Punkte, ~35 MB)
+npm run dev                               # Dev-Server auf http://localhost:5173
+npm run build                             # Produktions-Build nach dist/
 ```
 
 ## Architektur-Notizen

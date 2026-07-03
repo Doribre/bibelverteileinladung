@@ -7,7 +7,10 @@ body { font-family: system-ui, "Segoe UI", sans-serif; color: #1e293b; }
 /* Kopfbereich */
 header { background: #0f172a; color: #fff; flex-shrink: 0; }
 .titlebar { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px 2px; flex-wrap: wrap; gap: 6px; }
-.titlebar .subtitle { margin-left: 10px; color: #94a3b8; font-size: 13px; }
+.title-block { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.title-block strong { font-size: 15px; }
+.title-block .subtitle { color: #94a3b8; font-size: 12.5px; max-width: 760px; }
+.region-select { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; border-radius: 6px; padding: 4px 8px; font-size: 13px; margin-right: 6px; }
 .actions { display: flex; }
 .actions button { margin-left: 6px; background: #1e293b; color: #e2e8f0; border: 1px solid #334155; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 13px; }
 .actions button:hover { background: #334155; }
@@ -18,7 +21,12 @@ header { background: #0f172a; color: #fff; flex-shrink: 0; }
 .kpi { display: flex; align-items: center; gap: 28px; padding: 6px 16px 12px; flex-wrap: wrap; }
 .kpi-item { display: flex; align-items: center; gap: 9px; }
 .kpi-item i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
-.kpi-item .num { font-size: 24px; font-weight: 700; line-height: 1.1; }
+.kpi-item .num { font-size: 24px; font-weight: 700; line-height: 1.1; animation: kpi-pop 0.5s ease-out; }
+@keyframes kpi-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.35); color: #fde047; }
+  100% { transform: scale(1); }
+}
 .kpi-item .lbl { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; }
 .kpi-total { margin-left: auto; color: #cbd5e1; font-size: 14px; }
 
@@ -89,3 +97,40 @@ button.x:hover { color: #dc2626; }
 .popup-actions button { padding: 8px 10px; border-radius: 8px; border: 2px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 14px; text-align: left; }
 .popup-actions button:hover { background: #f1f5f9; }
 .popup-actions button.subtle { border-width: 1px; font-size: 12px; color: #64748b; }
+
+/* Nicht-zustellbar-Notiz */
+.nz-box { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+.nz-box input { padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+.nz-actions { display: flex; gap: 6px; }
+.nz-actions button { flex: 1; }
+
+/* Loot-Box-Feier: Funken + Ermutigung */
+.celebration { position: absolute; z-index: 30; pointer-events: none; width: 0; height: 0; }
+.sparkle { position: absolute; font-size: 22px; animation: sparkle-fly 1.3s ease-out forwards; opacity: 0; }
+.sparkle-0 { --dx: -70px; --dy: -90px; animation-delay: 0s; }
+.sparkle-1 { --dx: 60px; --dy: -100px; animation-delay: 0.05s; }
+.sparkle-2 { --dx: -100px; --dy: -20px; animation-delay: 0.1s; }
+.sparkle-3 { --dx: 95px; --dy: -35px; animation-delay: 0.12s; }
+.sparkle-4 { --dx: -45px; --dy: -140px; animation-delay: 0.18s; }
+.sparkle-5 { --dx: 30px; --dy: -150px; animation-delay: 0.22s; }
+.sparkle-6 { --dx: -15px; --dy: -110px; animation-delay: 0.28s; font-size: 28px; }
+.sparkle-7 { --dx: 80px; --dy: -130px; animation-delay: 0.33s; }
+@keyframes sparkle-fly {
+  0% { transform: translate(0, 0) scale(0.4) rotate(0deg); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1.25) rotate(40deg); opacity: 0; }
+}
+.cheer {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #451a03; font-weight: 700; font-size: 15px; white-space: nowrap;
+  padding: 9px 18px; border-radius: 999px; box-shadow: 0 6px 24px rgba(245, 158, 11, 0.5);
+  animation: cheer-float 2.5s ease-out forwards;
+}
+@keyframes cheer-float {
+  0% { transform: translate(-50%, 10px) scale(0.6); opacity: 0; }
+  12% { transform: translate(-50%, -10px) scale(1.08); opacity: 1; }
+  20% { transform: translate(-50%, -14px) scale(1); }
+  80% { transform: translate(-50%, -46px) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -70px) scale(0.95); opacity: 0; }
+}
