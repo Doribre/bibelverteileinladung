@@ -11,7 +11,8 @@ Live: https://doribre.github.io/bibelverteileinladung/
 
 - **KPI-Leiste (oben):** Unerreicht / Zugeteilt / Verteilt / Persönlich gesprochen —
   vier exklusive Kategorien, Summe = Zählbasis (adressierte Gebäude ohne Nebengebäude).
-- **Lasso / Polygon:** Bereich auf der Karte umfahren → enthaltene Häuser
+- **„Markiere dein Verteil-Gebiet":** Linie um den Bereich malen — kreuzt sie sich,
+  ist das Gebiet ausgewählt (Loslassen schließt ebenfalls). Enthaltene Häuser
   (Mittelpunkt-Regel) werden ausgewählt, Straßenliste wird abgeleitet, Gebiet kann
   benannt und einem Verteiler zugeordnet werden.
 - **Verteiler:** frei wählbare Namen, existieren nur in der Browser-Sitzung

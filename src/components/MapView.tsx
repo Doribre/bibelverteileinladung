@@ -5,7 +5,7 @@ import { closeRing, pointInPolygon, ringBbox, segmentIntersection } from "../geo
 import type { AreaView, Cat, Distributor, Ring } from "../types";
 import { CAT_COLORS, CAT_LABELS } from "../types";
 
-export type Tool = "select" | "lasso" | "poly";
+export type Tool = "select" | "lasso";
 
 interface Props {
   buildingsFC: any | null;
@@ -48,14 +48,10 @@ export default function MapView(props: Props) {
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [styleReady, setStyleReady] = useState(false);
   const [bldReady, setBldReady] = useState(false);
-  const [polyActive, setPolyActive] = useState(false);
   const propsRef = useRef(props);
   propsRef.current = props;
-  const polyPoints = useRef<Ring>([]);
   const prevCat = useRef<Map<number, Cat>>(new Map());
   const prevSel = useRef<Set<number>>(new Set());
-  const finishPolyRef = useRef<() => void>(() => {});
-  const cancelPolyRef = useRef<() => void>(() => {});
 
   // Karte einmalig initialisieren
   useEffect(() => {
@@ -157,21 +153,6 @@ export default function MapView(props: Props) {
       return null;
     };
 
-    finishPolyRef.current = () => {
-      // Doppelklick fügt doppelte Punkte hinzu — aufeinanderfolgende Duplikate entfernen
-      const pts = polyPoints.current.filter(
-        (p, i, arr) => i === 0 || p[0] !== arr[i - 1][0] || p[1] !== arr[i - 1][1]
-      );
-      polyPoints.current = [];
-      setPolyActive(false);
-      finishRing(pts);
-    };
-    cancelPolyRef.current = () => {
-      polyPoints.current = [];
-      setPolyActive(false);
-      clearDraw();
-    };
-
     // Wichtig: "style.load" statt "load" — "load" wartet auch auf die Basiskarten-
     // Kacheln des externen Servers; die App-Ebenen (Gebäude, Gebiete) dürfen davon
     // nicht abhängen. Der Style ist inline und damit sofort verfügbar.
@@ -213,25 +194,12 @@ export default function MapView(props: Props) {
 
     map.on("click", (e) => {
       const t = propsRef.current.tool;
-      if (t === "poly") {
-        polyPoints.current = [...polyPoints.current, [e.lngLat.lng, e.lngLat.lat]];
-        setPolyActive(true);
-        updateDraw(polyPoints.current);
-        return;
-      }
       if (t !== "select" || !map.getLayer("bld-fill")) return;
       const feats = map.queryRenderedFeatures(e.point, { layers: ["bld-fill", "bld-point"] });
       if (feats.length > 0) {
         propsRef.current.onBuildingClick(Number(feats[0].id), e.point.x, e.point.y);
       } else {
         propsRef.current.onBackgroundClick();
-      }
-    });
-
-    map.on("dblclick", (e) => {
-      if (propsRef.current.tool === "poly") {
-        e.preventDefault();
-        finishPolyRef.current();
       }
     });
 
@@ -450,20 +418,13 @@ export default function MapView(props: Props) {
     if (!map) return;
     if (props.tool === "lasso") map.dragPan.disable();
     else map.dragPan.enable();
-    if (props.tool === "poly") map.doubleClickZoom.disable();
-    else map.doubleClickZoom.enable();
     map.getCanvas().style.cursor = props.tool === "select" ? "" : "crosshair";
-    if (props.tool !== "poly") cancelPolyRef.current();
   }, [props.tool]);
 
-  // Tastatur: Esc bricht ab, Enter schließt Polygon
+  // Tastatur: Esc verlässt den Zeichenmodus
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        cancelPolyRef.current();
-        propsRef.current.setTool("select");
-      }
-      if (e.key === "Enter" && propsRef.current.tool === "poly") finishPolyRef.current();
+      if (e.key === "Escape") propsRef.current.setTool("select");
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -488,7 +449,7 @@ export default function MapView(props: Props) {
           onClick={() => props.setTool("select")}
           title="Häuser anklicken und Status setzen"
         >
-          🖱️ Auswählen
+          🖱️ Haus markieren
         </button>
         <button
           className={props.tool === "lasso" ? "active" : ""}
@@ -497,19 +458,6 @@ export default function MapView(props: Props) {
         >
           ✏️ Markiere dein Verteil-Gebiet
         </button>
-        <button
-          className={props.tool === "poly" ? "active" : ""}
-          onClick={() => props.setTool("poly")}
-          title="Eckpunkte anklicken, Doppelklick beendet"
-        >
-          ⬠ Polygon
-        </button>
-        {polyActive && (
-          <>
-            <button className="ok" onClick={() => finishPolyRef.current()}>✓ Fertig</button>
-            <button onClick={() => cancelPolyRef.current()}>✕ Abbrechen</button>
-          </>
-        )}
       </div>
       <div className="legend">
         {(["u", "z", "v", "g", "n"] as Cat[]).map((c) => (
@@ -518,11 +466,10 @@ export default function MapView(props: Props) {
           </span>
         ))}
       </div>
-      {props.tool !== "select" && (
+      {props.tool === "lasso" && (
         <div className="tool-hint">
-          {props.tool === "lasso"
-            ? "Einfach eine Linie um den Bereich malen — sobald sie sich kreuzt, ist das Gebiet ausgewählt. Loslassen schließt ebenfalls."
-            : "Eckpunkte anklicken · Doppelklick oder Enter schließt das Gebiet · Esc bricht ab."}
+          Einfach eine Linie um den Bereich malen — sobald sie sich kreuzt, ist das
+          Gebiet ausgewählt. Loslassen schließt ebenfalls.
         </div>
       )}
     </div>
