@@ -1,0 +1,90 @@
+// Zentrale Typen — Statusmodell siehe Konzept v2, Abschnitt 2:
+// zwei Dimensionen (Zuteilung × Ergebnis) → vier exklusive Anzeige-Kategorien.
+
+/** Anzeige-Kategorie: u=Unerreicht, z=Zugeteilt, v=Verteilt, g=Gesprochen, n=Nicht zustellbar */
+export type Cat = "u" | "z" | "v" | "g" | "n";
+
+export type Ring = [number, number][];
+
+export interface Building {
+  id: number;
+  street: string;
+  hnr: string;
+  plz: string;
+  /** Schwerpunkt [lng, lat] — vorberechnet in der Pipeline */
+  c: [number, number];
+}
+
+/** Append-only-Ereignisprotokoll: der Zustand ist immer eine Ableitung (Konzept v2, Abschnitt 7) */
+type DemoEventBase =
+  | { t: "distributor_added"; id: string; name: string; color: string }
+  | { t: "distributor_removed"; id: string }
+  | {
+      t: "area_created";
+      id: string;
+      name: string;
+      distributorId: string | null;
+      polygon: Ring;
+      buildingIds: number[];
+    }
+  | { t: "area_assigned"; areaId: string; distributorId: string | null }
+  | { t: "area_dissolved"; areaId: string }
+  | {
+      t: "building_status";
+      buildingId: number;
+      status: "verteilt" | "gesprochen" | "offen" | "nicht_zustellbar" | "zustellbar";
+    };
+
+/** g = Aktionsgruppe: Events eines Klicks teilen eine Gruppe, Undo nimmt die ganze Gruppe zurück */
+export type DemoEvent = DemoEventBase & { g?: string };
+
+export interface Distributor {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface AreaView {
+  id: string;
+  name: string;
+  distributorId: string | null;
+  polygon: Ring;
+  /** effektive Mitglieder (können durch spätere Gebiete abgeworben worden sein) */
+  memberIds: number[];
+  /** davon verteilt oder gesprochen */
+  done: number;
+}
+
+export interface Counts {
+  u: number;
+  z: number;
+  v: number;
+  g: number;
+  nz: number;
+  total: number;
+}
+
+export interface Derived {
+  distributors: Distributor[];
+  areas: AreaView[];
+  /** nur Einträge ungleich 'u' (Standard) */
+  cat: Map<number, Cat>;
+  assignedArea: Map<number, string>;
+  counts: Counts;
+}
+
+export const CAT_COLORS: Record<Cat, string> = {
+  u: "#9ca3af",
+  z: "#3b82f6",
+  v: "#16a34a",
+  g: "#eab308",
+  n: "#374151",
+};
+
+export const CAT_LABELS: Record<Cat, string> = {
+  u: "Unerreicht",
+  z: "Zugeteilt",
+  v: "Verteilt",
+  g: "Persönlich gesprochen",
+  n: "Nicht zustellbar",
+};
