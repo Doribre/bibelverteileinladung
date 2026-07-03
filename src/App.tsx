@@ -22,12 +22,19 @@ interface PopupState {
   y: number;
 }
 
+/** Gebiet aus der Adresse lesen: "#hh" (oder Pfad …/hh) zeigt Hamburg, sonst Bad Godesberg */
+function regionFromUrl(): string {
+  const h = location.hash.replace(/^#\/?/, "").toLowerCase();
+  if (h === "hh" || h === "hamburg") return "hamburg";
+  return REGIONS[0].key;
+}
+
 export default function App() {
-  const [regionKey, setRegionKey] = useState<string>(REGIONS[0].key);
+  const [regionKey, setRegionKey] = useState<string>(regionFromUrl);
   const region = REGIONS.find((r) => r.key === regionKey) ?? REGIONS[0];
   const [buildingsFC, setBuildingsFC] = useState<any | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [events, setEvents] = useState<DemoEvent[]>(() => loadEvents(REGIONS[0].key));
+  const [events, setEvents] = useState<DemoEvent[]>(() => loadEvents(regionFromUrl()));
   const [tool, setTool] = useState<Tool>("select");
   const [selection, setSelection] = useState<Selection | null>(null);
   const [popup, setPopup] = useState<PopupState | null>(null);
@@ -65,7 +72,16 @@ export default function App() {
     setPopup(null);
     setCelebration(null);
     setTool("select");
+    // Adresse mitführen: Hamburg-Link ist teilbar (…/#hh)
+    history.replaceState(null, "", key === "hamburg" ? "#hh" : location.pathname + location.search);
   };
+
+  // Adresszeile von Hand geändert (#hh entfernt/ergänzt) → Gebiet folgt
+  useEffect(() => {
+    const onHash = () => switchRegion(regionFromUrl());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  });
 
   const buildings = useMemo(() => {
     const m = new Map<number, Building>();
