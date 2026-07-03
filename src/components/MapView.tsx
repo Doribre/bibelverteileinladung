@@ -9,6 +9,8 @@ export type Tool = "select" | "lasso";
 
 interface Props {
   buildingsFC: any | null;
+  /** Notiz-Labels (Punktfeatures mit gekürztem Text), sichtbar erst bei naher Zoomstufe */
+  notesFC: any | null;
   cat: Map<number, Cat>;
   areas: AreaView[];
   distributors: Distributor[];
@@ -59,6 +61,8 @@ export default function MapView(props: Props) {
       container: containerRef.current!,
       style: {
         version: 8,
+        // Schriftzeichen für die Notiz-Labels (Symbol-Layer brauchen eine Glyphen-Quelle)
+        glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
         sources: {
           osm: {
             type: "raster",
@@ -170,6 +174,28 @@ export default function MapView(props: Props) {
         source: "areas",
         paint: { "line-color": ["get", "color"], "line-width": 3 },
       });
+      // Notiz-Labels: erscheinen erst ab Zoom 16 und weichen sich gegenseitig aus,
+      // damit die Karte übersichtlich bleibt
+      map.addSource("notes", { type: "geojson", data: EMPTY_FC });
+      map.addLayer({
+        id: "note-labels",
+        type: "symbol",
+        source: "notes",
+        minzoom: 16,
+        layout: {
+          "text-field": ["get", "text"],
+          "text-font": ["Noto Sans Regular"],
+          "text-size": 11.5,
+          "text-offset": [0, -1.1],
+          "text-anchor": "bottom",
+          "text-max-width": 12,
+        },
+        paint: {
+          "text-color": "#0f172a",
+          "text-halo-color": "#fef9c3",
+          "text-halo-width": 1.8,
+        },
+      });
       map.addSource("draw", { type: "geojson", data: EMPTY_FC });
       map.addLayer({
         id: "draw-fill",
@@ -195,7 +221,8 @@ export default function MapView(props: Props) {
     map.on("click", (e) => {
       const t = propsRef.current.tool;
       if (t !== "select" || !map.getLayer("bld-fill")) return;
-      const feats = map.queryRenderedFeatures(e.point, { layers: ["bld-fill", "bld-point"] });
+      // Notiz-Label zählt als Klick auf sein Gebäude (größere Klickfläche)
+      const feats = map.queryRenderedFeatures(e.point, { layers: ["note-labels", "bld-fill", "bld-point"] });
       if (feats.length > 0) {
         propsRef.current.onBuildingClick(Number(feats[0].id), e.point.x, e.point.y);
       } else {
@@ -364,6 +391,14 @@ export default function MapView(props: Props) {
       }
     };
   }, [props.flash, bldReady]);
+
+  // Notiz-Labels aktualisieren
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !styleReady) return;
+    const src = map.getSource("notes") as maplibregl.GeoJSONSource | undefined;
+    if (src) src.setData(props.notesFC ?? EMPTY_FC);
+  }, [props.notesFC, styleReady]);
 
   // Status-Farben aktualisieren (nur Differenzen)
   useEffect(() => {

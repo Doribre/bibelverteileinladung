@@ -5,6 +5,9 @@ export interface CelebrationData {
   x: number;
   y: number;
   message: string;
+  /** Hintergrund in der Farbe der gesetzten Markierung */
+  bg: string;
+  fg: string;
 }
 
 const SPARKLES = ["✨", "⭐", "✨", "🌟", "✨", "⭐", "🌟", "✨"];
@@ -24,7 +27,12 @@ export default function Celebration({ data, onDone }: { data: CelebrationData; o
       {SPARKLES.map((s, i) => (
         <span key={i} className={`sparkle sparkle-${i}`}>{s}</span>
       ))}
-      <div className="cheer">{data.message}</div>
+      <div
+        className="cheer"
+        style={{ background: data.bg, color: data.fg, boxShadow: `0 6px 24px ${data.bg}80` }}
+      >
+        {data.message}
+      </div>
     </div>
   );
 }

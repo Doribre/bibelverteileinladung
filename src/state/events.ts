@@ -14,7 +14,7 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
   const assign = new Map<number, string>(); // Gebäude → Gebiet (letzte Zuteilung gewinnt)
   const ergebnis = new Map<number, "v" | "g">();
   const nz = new Set<number>(); // Kennzeichen: Haus bleibt in der Zählbasis
-  const nzComment = new Map<number, string>();
+  const notes = new Map<number, string>(); // Gebäude-Notizen, statusunabhängig
 
   for (const e of events) {
     switch (e.t) {
@@ -57,33 +57,37 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
           case "verteilt":
             ergebnis.set(e.buildingId, "v");
             nz.delete(e.buildingId);
-            nzComment.delete(e.buildingId);
             break;
           case "gesprochen":
             ergebnis.set(e.buildingId, "g");
             nz.delete(e.buildingId);
-            nzComment.delete(e.buildingId);
             break;
           case "offen":
             ergebnis.delete(e.buildingId);
             nz.delete(e.buildingId);
-            nzComment.delete(e.buildingId);
             break;
           case "nicht_zustellbar":
             nz.add(e.buildingId);
             ergebnis.delete(e.buildingId);
+            // veraltetes comment-Feld (frühere Exporte) als Notiz übernehmen
             if (e.comment !== undefined) {
               const c = e.comment.trim();
-              if (c) nzComment.set(e.buildingId, c);
-              else nzComment.delete(e.buildingId);
+              if (c) notes.set(e.buildingId, c);
+              else notes.delete(e.buildingId);
             }
             break;
           case "zustellbar":
             nz.delete(e.buildingId);
-            nzComment.delete(e.buildingId);
             break;
         }
         break;
+      case "building_note": {
+        if (buildings.size > 0 && !buildings.has(e.buildingId)) break;
+        const n = e.note.trim();
+        if (n) notes.set(e.buildingId, n);
+        else notes.delete(e.buildingId);
+        break;
+      }
     }
   }
 
@@ -134,7 +138,7 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
     return { ...a, memberIds: m, done };
   });
 
-  return { distributors: [...dists.values()], areas: areaViews, cat, assignedArea: assign, nzComment, counts };
+  return { distributors: [...dists.values()], areas: areaViews, cat, assignedArea: assign, notes, counts };
 }
 
 /** Farbpalette für Verteiler (bewusst getrennt von den Statusfarben) */
@@ -192,6 +196,9 @@ export function sanitizeEvents(raw: unknown): DemoEvent[] | null {
       case "building_status":
         if (typeof ev.buildingId !== "number" || !STATUS_VALUES.has(ev.status as string)) return null;
         if (ev.comment !== undefined && (typeof ev.comment !== "string" || ev.comment.length > 500)) return null;
+        break;
+      case "building_note":
+        if (typeof ev.buildingId !== "number" || typeof ev.note !== "string" || ev.note.length > 500) return null;
         break;
       default:
         return null;

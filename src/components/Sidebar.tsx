@@ -1,5 +1,32 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Derived } from "../types";
+
+/** Zahl mit Hochzähl-Effekt: läuft in ~0,9 s vom alten zum neuen Wert */
+function CountUp({ value }: { value: number }) {
+  const [display, setDisplay] = useState(value);
+  const prevRef = useRef(value);
+  useEffect(() => {
+    const from = prevRef.current;
+    const to = value;
+    prevRef.current = value;
+    if (from === to) {
+      setDisplay(to);
+      return;
+    }
+    const t0 = performance.now();
+    const duration = 900;
+    let raf = 0;
+    const step = (t: number) => {
+      const p = Math.min(1, (t - t0) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(Math.round(from + (to - from) * eased));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <>{display}</>;
+}
 
 interface Props {
   derived: Derived;
@@ -84,9 +111,6 @@ export default function Sidebar({
                   <button className="link grow" onClick={() => onFocusArea(a.id)} title="Auf Karte zeigen">
                     {a.name}
                   </button>
-                  <span className="hint">
-                    {a.memberIds.length} Häuser · {pct} %
-                  </span>
                   <button
                     className="x"
                     title="Gebiet auflösen"
@@ -103,7 +127,16 @@ export default function Sidebar({
                     ×
                   </button>
                 </div>
-                <div className="progress">
+                <div className="area-progress-big">
+                  <span className="area-pct" style={{ color: pct === 100 ? "#16a34a" : "#0f172a" }}>
+                    <CountUp value={pct} /> %
+                  </span>
+                  <span className="area-frac">
+                    <CountUp value={a.done} /> von {a.memberIds.length} Häusern
+                  </span>
+                  {pct === 100 && <span className="area-done">🎉 Geschafft!</span>}
+                </div>
+                <div className="progress big">
                   <i style={{ width: pct + "%" }} />
                 </div>
                 <select

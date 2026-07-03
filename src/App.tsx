@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Building, Cat, DemoEvent, Ring } from "./types";
-import { REGIONS } from "./types";
+import { CAT_COLORS, REGIONS } from "./types";
 import { derive, newId, nextColor, sanitizeEvents } from "./state/events";
 import { loadEvents, saveEvents } from "./state/storage";
 import { randomEncouragement } from "./encouragements";
@@ -163,19 +163,33 @@ export default function App() {
 
   const setStatus = (
     status: "verteilt" | "gesprochen" | "offen" | "nicht_zustellbar" | "zustellbar",
-    comment?: string
+    note?: string
   ) => {
     if (!popup) return;
-    const ev: DemoEvent = { t: "building_status", buildingId: popup.buildingId, status };
-    if (comment !== undefined) ev.comment = comment;
-    dispatch(ev);
-    // Loot-Box-Moment: Blinken + Funken + Bling + Ermutigung
+    const evs: DemoEvent[] = [{ t: "building_status", buildingId: popup.buildingId, status }];
+    // geänderte Notiz gehört zur selben Aktion (gemeinsames Undo)
+    if (note !== undefined) evs.push({ t: "building_note", buildingId: popup.buildingId, note });
+    dispatch(...evs);
+    // Loot-Box-Moment: Blinken + Funken + Bling + Ermutigung (in der Statusfarbe)
     if (status === "verteilt" || status === "gesprochen") {
       bling();
       setFlash({ id: popup.buildingId, ts: Date.now() });
-      setCelebration({ id: newId("c"), x: popup.x, y: popup.y, message: randomEncouragement() });
+      const isVerteilt = status === "verteilt";
+      setCelebration({
+        id: newId("c"),
+        x: popup.x,
+        y: popup.y,
+        message: randomEncouragement(),
+        bg: isVerteilt ? CAT_COLORS.v : CAT_COLORS.g,
+        fg: isVerteilt ? "#ffffff" : "#451a03",
+      });
     }
     setPopup(null);
+  };
+
+  const saveNote = (note: string) => {
+    if (!popup) return;
+    dispatch({ t: "building_note", buildingId: popup.buildingId, note });
   };
 
   const createArea = (opts: {
@@ -225,9 +239,30 @@ export default function App() {
       b,
       cat: (derived.cat.get(popup.buildingId) ?? "u") as Cat,
       label,
-      nzComment: derived.nzComment.get(popup.buildingId) ?? null,
+      note: derived.notes.get(popup.buildingId) ?? null,
     };
   }, [popup, buildings, derived]);
+
+  // Notiz-Labels für die Karte (erste Worte, erscheinen erst bei naher Zoomstufe)
+  const notesFC = useMemo(
+    () => ({
+      type: "FeatureCollection",
+      features: [...derived.notes.entries()].flatMap(([id, note]) => {
+        const b = buildings.get(id);
+        if (!b) return [];
+        const text = note.length > 20 ? note.slice(0, 19).trimEnd() + "…" : note;
+        return [
+          {
+            type: "Feature",
+            id,
+            geometry: { type: "Point", coordinates: b.c },
+            properties: { id, text },
+          },
+        ];
+      }),
+    }),
+    [derived.notes, buildings]
+  );
 
   // Test-/Demo-Haken für programmatische Bedienung (nur Entwicklung/Verifikation)
   useEffect(() => {
@@ -303,6 +338,7 @@ export default function App() {
           )}
           <MapView
             buildingsFC={buildingsFC}
+            notesFC={notesFC}
             cat={derived.cat}
             areas={derived.areas}
             distributors={derived.distributors}
@@ -320,10 +356,11 @@ export default function App() {
               building={popupData.b}
               cat={popupData.cat}
               areaLabel={popupData.label}
-              nzComment={popupData.nzComment}
+              note={popupData.note}
               x={popup.x}
               y={popup.y}
               onSet={setStatus}
+              onSaveNote={saveNote}
               onClose={() => setPopup(null)}
             />
           )}

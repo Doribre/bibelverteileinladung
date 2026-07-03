@@ -65,7 +65,13 @@ button.link:hover { text-decoration: underline; }
 button.x { background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 0 4px; line-height: 1; }
 button.x:hover { color: #dc2626; }
 .progress { height: 6px; background: #e2e8f0; border-radius: 3px; margin: 6px 0; overflow: hidden; }
-.progress i { display: block; height: 100%; background: #16a34a; }
+.progress i { display: block; height: 100%; background: #16a34a; transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+.progress.big { height: 12px; border-radius: 6px; }
+.progress.big i { background: linear-gradient(90deg, #4ade80, #16a34a); }
+.area-progress-big { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+.area-pct { font-size: 26px; font-weight: 800; line-height: 1; }
+.area-frac { color: #64748b; font-size: 12.5px; }
+.area-done { font-size: 13px; font-weight: 700; color: #16a34a; animation: kpi-pop 0.6s ease-out; }
 .sidebar select { width: 100%; padding: 5px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; margin-top: 2px; background: #fff; }
 .sidebar footer { margin-top: auto; padding: 10px 14px; font-size: 11px; color: #94a3b8; }
 
@@ -98,11 +104,11 @@ button.x:hover { color: #dc2626; }
 .popup-actions button:hover { background: #f1f5f9; }
 .popup-actions button.subtle { border-width: 1px; font-size: 12px; color: #64748b; }
 
-/* Nicht-zustellbar-Notiz */
-.nz-box { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #e2e8f0; padding-top: 8px; }
-.nz-box input { padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
-.nz-actions { display: flex; gap: 6px; }
-.nz-actions button { flex: 1; }
+/* Gebäude-Notiz (für jede Markierungsart) */
+.note-box { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 8px; }
+.note-box input { padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+.note-box button { padding: 6px 10px; border-radius: 7px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 12px; color: #334155; }
+.note-box button:hover { background: #f1f5f9; }
 
 /* Loot-Box-Feier: Funken + Ermutigung */
 .celebration { position: absolute; z-index: 30; pointer-events: none; width: 0; height: 0; }
@@ -121,10 +127,10 @@ button.x:hover { color: #dc2626; }
   100% { transform: translate(var(--dx), var(--dy)) scale(1.25) rotate(40deg); opacity: 0; }
 }
 .cheer {
+  /* Hintergrundfarbe kommt inline in der Farbe der gesetzten Markierung */
   position: absolute; left: 50%; transform: translateX(-50%);
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #451a03; font-weight: 700; font-size: 15px; white-space: nowrap;
-  padding: 9px 18px; border-radius: 999px; box-shadow: 0 6px 24px rgba(245, 158, 11, 0.5);
+  font-weight: 700; font-size: 15px; white-space: nowrap;
+  padding: 9px 18px; border-radius: 999px;
   animation: cheer-float 2.5s ease-out forwards;
 }
 @keyframes cheer-float {

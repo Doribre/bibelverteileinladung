@@ -33,8 +33,14 @@ type DemoEventBase =
       t: "building_status";
       buildingId: number;
       status: "verteilt" | "gesprochen" | "offen" | "nicht_zustellbar" | "zustellbar";
-      /** nur bei nicht_zustellbar: Logistik-Notiz zum Gebäude (z. B. "Baustelle") */
+      /** veraltet (frühere Exporte): Notiz bei nicht_zustellbar — wird als building_note übernommen */
       comment?: string;
+    }
+  | {
+      /** Gebäude-Notiz, unabhängig vom Status; leerer Text löscht die Notiz */
+      t: "building_note";
+      buildingId: number;
+      note: string;
     };
 
 /** g = Aktionsgruppe: Events eines Klicks teilen eine Gruppe, Undo nimmt die ganze Gruppe zurück */
@@ -73,8 +79,8 @@ export interface Derived {
   /** Anzeige-Kategorie je Gebäude, nur Einträge ungleich 'u' (Standard) */
   cat: Map<number, Cat>;
   assignedArea: Map<number, string>;
-  /** Logistik-Notizen der nicht_zustellbaren Häuser */
-  nzComment: Map<number, string>;
+  /** Gebäude-Notizen (statusunabhängig, nur Angaben zum Gebäude) */
+  notes: Map<number, string>;
   counts: Counts;
 }
 
