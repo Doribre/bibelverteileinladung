@@ -104,6 +104,15 @@ button.x:hover { color: #dc2626; }
 .popup-actions button:hover { background: #f1f5f9; }
 .popup-actions button.subtle { border-width: 1px; font-size: 12px; color: #64748b; }
 
+/* Briefkästen/Wohnungen-Zähler */
+.units-box { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 8px; }
+.units-label { font-size: 13px; color: #334155; }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper button { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; font-size: 19px; font-weight: 700; cursor: pointer; line-height: 1; color: #0f172a; }
+.stepper button:hover:not(:disabled) { background: #f1f5f9; }
+.stepper button:disabled { opacity: 0.35; cursor: default; }
+.stepper input { width: 44px; height: 34px; text-align: center; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; font-weight: 700; }
+
 /* Gebäude-Notiz (für jede Markierungsart) */
 .note-box { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 8px; }
 .note-box input { padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }

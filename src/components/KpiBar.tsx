@@ -10,6 +10,7 @@ export default function KpiBar({ counts }: { counts: Counts }) {
     { label: "Zugeteilt", value: counts.z, color: CAT_COLORS.z },
     { label: "Verteilt", value: counts.v, color: CAT_COLORS.v },
     { label: "Persönlich gesprochen", value: counts.g, color: CAT_COLORS.g },
+    { label: "Wohnungen erreicht", value: counts.w, color: "#8b5cf6" },
   ];
   return (
     <div className="kpi">
@@ -24,7 +25,9 @@ export default function KpiBar({ counts }: { counts: Counts }) {
         </div>
       ))}
       <div className="kpi-total">
-        Gesamt {counts.total.toLocaleString("de-DE")} · <strong>{pct} % erreicht</strong>
+        Gesamt {counts.total.toLocaleString("de-DE")} Häuser
+        {counts.wTotal > counts.total && <> (mind. {counts.wTotal.toLocaleString("de-DE")} Wohnungen)</>}
+        {" "}· <strong>{pct} % erreicht</strong>
         {counts.nz > 0 && <> · {counts.nz} nicht zustellbar</>}
       </div>
     </div>

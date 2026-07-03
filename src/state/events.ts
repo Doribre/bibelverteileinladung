@@ -15,6 +15,7 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
   const ergebnis = new Map<number, "v" | "g">();
   const nz = new Set<number>(); // Kennzeichen: Haus bleibt in der Zählbasis
   const notes = new Map<number, string>(); // Gebäude-Notizen, statusunabhängig
+  const units = new Map<number, number>(); // Briefkästen/Wohnungen je Gebäude (Standard 1)
 
   for (const e of events) {
     switch (e.t) {
@@ -88,6 +89,13 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
         else notes.delete(e.buildingId);
         break;
       }
+      case "building_units": {
+        if (buildings.size > 0 && !buildings.has(e.buildingId)) break;
+        const u = Math.max(1, Math.min(99, Math.round(e.units)));
+        if (u === 1) units.delete(e.buildingId); // Standardwert nicht extra speichern
+        else units.set(e.buildingId, u);
+        break;
+      }
     }
   }
 
@@ -109,15 +117,19 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
 
   // Zählung: nicht_zustellbar nimmt NICHTS aus der Zählbasis — das Haus zählt
   // nach seinem Grundzustand weiter (zugeteilt oder unerreicht)
-  let z = 0, v = 0, g = 0;
+  const unitsOf = (b: number) => units.get(b) ?? 1;
+  let z = 0, v = 0, g = 0, w = 0;
   for (const [b, c] of cat) {
-    if (c === "v") v++;
-    else if (c === "g") g++;
+    if (c === "v") { v++; w += unitsOf(b); }
+    else if (c === "g") { g++; w += unitsOf(b); }
     else if (c === "z") z++;
     else if (c === "n" && isAssigned(b)) z++;
   }
   const total = buildings.size;
-  const counts = { z, v, g, nz: nz.size, total, u: Math.max(0, total - z - v - g) };
+  // Wohnungen gesamt: Häuser ohne Angabe zählen als 1 → Mindestzahl
+  let wTotal = total;
+  for (const [, u] of units) wTotal += u - 1;
+  const counts = { z, v, g, nz: nz.size, total, u: Math.max(0, total - z - v - g), w, wTotal };
 
   // effektive Mitglieder je Gebiet (nicht_zustellbare Häuser bleiben offene Aufgabe)
   const members = new Map<string, number[]>();
@@ -131,14 +143,20 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
   }
   const areaViews: AreaView[] = [...areas.values()].map((a) => {
     const m = members.get(a.id) ?? [];
-    const done = m.filter((b) => {
+    let done = 0, unitsDone = 0, unitsTotal = 0;
+    for (const b of m) {
+      const u = unitsOf(b);
+      unitsTotal += u;
       const c = cat.get(b);
-      return c === "v" || c === "g";
-    }).length;
-    return { ...a, memberIds: m, done };
+      if (c === "v" || c === "g") {
+        done++;
+        unitsDone += u;
+      }
+    }
+    return { ...a, memberIds: m, done, unitsDone, unitsTotal };
   });
 
-  return { distributors: [...dists.values()], areas: areaViews, cat, assignedArea: assign, notes, counts };
+  return { distributors: [...dists.values()], areas: areaViews, cat, assignedArea: assign, notes, units, counts };
 }
 
 /** Farbpalette für Verteiler (bewusst getrennt von den Statusfarben) */
@@ -199,6 +217,9 @@ export function sanitizeEvents(raw: unknown): DemoEvent[] | null {
         break;
       case "building_note":
         if (typeof ev.buildingId !== "number" || typeof ev.note !== "string" || ev.note.length > 500) return null;
+        break;
+      case "building_units":
+        if (typeof ev.buildingId !== "number" || typeof ev.units !== "number" || !Number.isFinite(ev.units)) return null;
         break;
       default:
         return null;

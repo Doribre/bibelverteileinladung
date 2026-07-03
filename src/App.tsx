@@ -220,6 +220,11 @@ export default function App() {
     dispatch({ t: "building_note", buildingId: popup.buildingId, note });
   };
 
+  const setUnits = (units: number) => {
+    if (!popup) return;
+    dispatch({ t: "building_units", buildingId: popup.buildingId, units });
+  };
+
   const createArea = (opts: {
     name: string;
     distributorId: string | null;
@@ -269,6 +274,7 @@ export default function App() {
       cat: (derived.cat.get(popup.buildingId) ?? "u") as Cat,
       label,
       note: derived.notes.get(popup.buildingId) ?? null,
+      units: derived.units.get(popup.buildingId) ?? 1,
     };
   }, [popup, buildings, derived]);
 
@@ -386,10 +392,12 @@ export default function App() {
               cat={popupData.cat}
               areaLabel={popupData.label}
               note={popupData.note}
+              units={popupData.units}
               x={popup.x}
               y={popup.y}
               onSet={setStatus}
               onSaveNote={saveNote}
+              onSetUnits={setUnits}
               onClose={() => setPopup(null)}
             />
           )}

@@ -133,6 +133,7 @@ export default function Sidebar({
                   </span>
                   <span className="area-frac">
                     <CountUp value={a.done} /> von {a.memberIds.length} Häusern
+                    {" · "}📮 <CountUp value={a.unitsDone} /> von {a.unitsTotal} Wohnungen
                   </span>
                   {pct === 100 && <span className="area-done">🎉 Geschafft!</span>}
                 </div>

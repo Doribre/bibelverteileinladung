@@ -41,6 +41,12 @@ type DemoEventBase =
       t: "building_note";
       buildingId: number;
       note: string;
+    }
+  | {
+      /** Anzahl Briefkästen/Wohnungen im Gebäude (1–99, Standard 1) */
+      t: "building_units";
+      buildingId: number;
+      units: number;
     };
 
 /** g = Aktionsgruppe: Events eines Klicks teilen eine Gruppe, Undo nimmt die ganze Gruppe zurück */
@@ -61,6 +67,10 @@ export interface AreaView {
   memberIds: number[];
   /** davon verteilt oder gesprochen */
   done: number;
+  /** Wohnungen der erledigten Häuser */
+  unitsDone: number;
+  /** Wohnungen aller Häuser im Gebiet (unbekannte Häuser zählen als 1) */
+  unitsTotal: number;
 }
 
 export interface Counts {
@@ -71,6 +81,10 @@ export interface Counts {
   /** Info-Zähler: nicht_zustellbar ist ein Kennzeichen, die Häuser bleiben in der Zählbasis */
   nz: number;
   total: number;
+  /** Wohnungen/Briefkästen der erreichten Häuser (verteilt + gesprochen) */
+  w: number;
+  /** Wohnungen gesamt — Häuser ohne Angabe zählen als 1, also eine Mindestzahl */
+  wTotal: number;
 }
 
 export interface Derived {
@@ -81,6 +95,8 @@ export interface Derived {
   assignedArea: Map<number, string>;
   /** Gebäude-Notizen (statusunabhängig, nur Angaben zum Gebäude) */
   notes: Map<number, string>;
+  /** Briefkästen/Wohnungen je Gebäude (nur erfasste; Standard ist 1) */
+  units: Map<number, number>;
   counts: Counts;
 }
 

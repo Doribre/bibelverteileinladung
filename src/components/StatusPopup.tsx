@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Building, Cat } from "../types";
 import { CAT_COLORS, CAT_LABELS } from "../types";
 
@@ -7,6 +7,7 @@ interface Props {
   cat: Cat;
   areaLabel: string | null;
   note: string | null;
+  units: number;
   x: number;
   y: number;
   onSet: (
@@ -14,11 +15,20 @@ interface Props {
     note?: string
   ) => void;
   onSaveNote: (note: string) => void;
+  onSetUnits: (units: number) => void;
   onClose: () => void;
 }
 
-export default function StatusPopup({ building, cat, areaLabel, note: savedNote, x, y, onSet, onSaveNote, onClose }: Props) {
+export default function StatusPopup({ building, cat, areaLabel, note: savedNote, units, x, y, onSet, onSaveNote, onSetUnits, onClose }: Props) {
   const [note, setNote] = useState(savedNote ?? "");
+  // Eingabefeld für Wohnungen: Entwurf lokal, damit auch Tippen (statt +/−) geht
+  const [unitsDraft, setUnitsDraft] = useState(String(units));
+  useEffect(() => setUnitsDraft(String(units)), [units]);
+  const commitUnits = (value: string) => {
+    const n = parseInt(value, 10);
+    if (!Number.isNaN(n)) onSetUnits(Math.max(1, Math.min(99, n)));
+    else setUnitsDraft(String(units));
+  };
   const noteChanged = note.trim() !== (savedNote ?? "");
 
   // Status setzen — eine gerade geänderte Notiz wandert mit in dieselbe Aktion
@@ -67,6 +77,20 @@ export default function StatusPopup({ building, cat, areaLabel, note: savedNote,
         {(cat === "v" || cat === "g") && (
           <button className="subtle" onClick={() => send("offen")}>↶ Zurücksetzen</button>
         )}
+      </div>
+      <div className="units-box">
+        <span className="units-label">📮 Briefkästen/Wohnungen</span>
+        <div className="stepper">
+          <button onClick={() => onSetUnits(Math.max(1, units - 1))} disabled={units <= 1} title="eine Wohnung weniger">−</button>
+          <input
+            value={unitsDraft}
+            inputMode="numeric"
+            onChange={(e) => setUnitsDraft(e.target.value.replace(/[^0-9]/g, ""))}
+            onBlur={(e) => commitUnits(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && commitUnits((e.target as HTMLInputElement).value)}
+          />
+          <button onClick={() => onSetUnits(Math.min(99, units + 1))} disabled={units >= 99} title="eine Wohnung mehr">+</button>
+        </div>
       </div>
       <div className="note-box">
         <input
