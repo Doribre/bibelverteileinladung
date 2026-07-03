@@ -48,8 +48,8 @@ export default function Sidebar({
         </div>
         {derived.distributors.length === 0 && (
           <p className="empty">
-            Noch keine Verteiler. Namen anlegen — oder direkt mit dem Lasso ein Gebiet
-            umfahren und den Namen dort vergeben.
+            Noch keine Verteiler. Namen anlegen — oder direkt über „Markiere dein
+            Verteil-Gebiet" einen Bereich umfahren und den Namen dort vergeben.
           </p>
         )}
         <ul>
@@ -69,8 +69,8 @@ export default function Sidebar({
         <h2>Gebiete</h2>
         {derived.areas.length === 0 && (
           <p className="empty">
-            Noch keine Gebiete. Werkzeug „Lasso" oder „Polygon" wählen und einen Bereich
-            auf der Karte umfahren.
+            Noch keine Gebiete. Oben „Markiere dein Verteil-Gebiet" wählen und einen
+            Bereich auf der Karte umfahren.
           </p>
         )}
         <ul>

@@ -495,7 +495,7 @@ export default function MapView(props: Props) {
           onClick={() => props.setTool("lasso")}
           title="Linie um den Bereich ziehen — kreuzt sie sich, ist das Gebiet ausgewählt"
         >
-          ✏️ Gebiet zeichnen
+          ✏️ Markiere dein Verteil-Gebiet
         </button>
         <button
           className={props.tool === "poly" ? "active" : ""}
