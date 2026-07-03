@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { closeRing, pointInPolygon, ringBbox, segmentIntersection } from "../geo";
+import { useIsMobile } from "../useIsMobile";
 import type { AreaView, Cat, Distributor, Ring } from "../types";
 import { CAT_COLORS, CAT_LABELS } from "../types";
 
@@ -46,6 +47,7 @@ const COLOR_EXPR: any = [
 const SEL_COLOR: any = ["case", ["boolean", ["feature-state", "sel"], false], "#0369a1", "#334155"];
 
 export default function MapView(props: Props) {
+  const mobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [styleReady, setStyleReady] = useState(false);
@@ -484,14 +486,14 @@ export default function MapView(props: Props) {
           onClick={() => props.setTool("select")}
           title="Häuser anklicken und Status setzen"
         >
-          🖱️ Haus markieren
+          {mobile ? "🖱️ Haus" : "🖱️ Haus markieren"}
         </button>
         <button
           className={props.tool === "lasso" ? "active" : ""}
           onClick={() => props.setTool("lasso")}
           title="Linie um den Bereich ziehen — kreuzt sie sich, ist das Gebiet ausgewählt"
         >
-          ✏️ Markiere dein Verteil-Gebiet
+          {mobile ? "✏️ Gebiet markieren" : "✏️ Markiere dein Verteil-Gebiet"}
         </button>
       </div>
       <div className="legend">
@@ -503,8 +505,9 @@ export default function MapView(props: Props) {
       </div>
       {props.tool === "lasso" && (
         <div className="tool-hint">
-          Einfach eine Linie um den Bereich malen — sobald sie sich kreuzt, ist das
-          Gebiet ausgewählt. Loslassen schließt ebenfalls.
+          {mobile
+            ? "Mit dem Finger eine Linie um dein Gebiet malen — kreuzt sie sich, ist es ausgewählt."
+            : "Einfach eine Linie um den Bereich malen — sobald sie sich kreuzt, ist das Gebiet ausgewählt. Loslassen schließt ebenfalls."}
         </div>
       )}
     </div>

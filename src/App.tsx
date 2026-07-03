@@ -11,6 +11,7 @@ import Sidebar from "./components/Sidebar";
 import AreaDialog from "./components/AreaDialog";
 import StatusPopup from "./components/StatusPopup";
 import Celebration, { type CelebrationData } from "./components/Celebration";
+import { useIsMobile } from "./useIsMobile";
 
 interface Selection {
   ids: number[];
@@ -53,6 +54,9 @@ export default function App() {
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
   const [flash, setFlash] = useState<{ id: number; ts: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mobile = useIsMobile();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Gebäudedaten des gewählten Gebiets laden
   useEffect(() => {
@@ -82,6 +86,7 @@ export default function App() {
     setSelection(null);
     setPopup(null);
     setCelebration(null);
+    setSheetOpen(false);
     setTool(defaultTool(loadEvents(key)));
     // Adresse mitführen: Hamburg-Link ist teilbar (…/#hh)
     history.replaceState(null, "", key === "hamburg" ? "#hh" : location.pathname + location.search);
@@ -305,6 +310,7 @@ export default function App() {
       counts: derived.counts,
       eventCount: events.length,
       region: regionKey,
+      sheetOpen,
       dispatch: (e: DemoEvent) => dispatch(e),
       buildingIds: () => [...buildings.keys()],
       selectRect: (w: number, s: number, e2: number, n: number) => {
@@ -338,13 +344,22 @@ export default function App() {
             >
               {REGIONS.map((r) => (
                 <option key={r.key} value={r.key}>
-                  {r.name}
+                  {mobile ? r.name.replace(" (ganze Stadt)", "") : r.name}
                 </option>
               ))}
             </select>
-            <button onClick={undo} disabled={events.length === 0}>↶ Rückgängig</button>
-            <button onClick={exportState} disabled={events.length === 0}>Export</button>
-            <button onClick={() => fileInputRef.current?.click()}>Import</button>
+            <button onClick={undo} disabled={events.length === 0} title="Rückgängig">
+              {mobile ? "↶" : "↶ Rückgängig"}
+            </button>
+            {mobile ? (
+              <button onClick={() => setMenuOpen((o) => !o)} title="Mehr">⋮</button>
+            ) : (
+              <>
+                <button onClick={exportState} disabled={events.length === 0}>Export</button>
+                <button onClick={() => fileInputRef.current?.click()}>Import</button>
+                <button className="danger" onClick={reset} disabled={events.length === 0}>Zurücksetzen</button>
+              </>
+            )}
             <input
               ref={fileInputRef}
               type="file"
@@ -356,7 +371,13 @@ export default function App() {
                 e.target.value = "";
               }}
             />
-            <button className="danger" onClick={reset} disabled={events.length === 0}>Zurücksetzen</button>
+            {mobile && menuOpen && (
+              <div className="menu-drop" onClick={() => setMenuOpen(false)}>
+                <button onClick={exportState} disabled={events.length === 0}>Export</button>
+                <button onClick={() => fileInputRef.current?.click()}>Import</button>
+                <button className="danger" onClick={reset} disabled={events.length === 0}>Zurücksetzen</button>
+              </div>
+            )}
           </div>
         </div>
         <KpiBar counts={derived.counts} />
@@ -395,6 +416,7 @@ export default function App() {
               units={popupData.units}
               x={popup.x}
               y={popup.y}
+              mobile={mobile}
               onSet={setStatus}
               onSaveNote={saveNote}
               onSetUnits={setUnits}
@@ -419,6 +441,9 @@ export default function App() {
         </div>
         <Sidebar
           derived={derived}
+          mobile={mobile}
+          open={sheetOpen}
+          onToggle={() => setSheetOpen((o) => !o)}
           onAddDistributor={(name) =>
             dispatch({ t: "distributor_added", id: newId("d"), name, color: nextColor(derived.distributors.length) })
           }

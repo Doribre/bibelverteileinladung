@@ -10,6 +10,8 @@ interface Props {
   units: number;
   x: number;
   y: number;
+  /** Handy: als Bottom-Sheet statt schwebendem Fenster */
+  mobile: boolean;
   onSet: (
     status: "verteilt" | "gesprochen" | "offen" | "nicht_zustellbar" | "zustellbar",
     note?: string
@@ -19,7 +21,7 @@ interface Props {
   onClose: () => void;
 }
 
-export default function StatusPopup({ building, cat, areaLabel, note: savedNote, units, x, y, onSet, onSaveNote, onSetUnits, onClose }: Props) {
+export default function StatusPopup({ building, cat, areaLabel, note: savedNote, units, x, y, mobile, onSet, onSaveNote, onSetUnits, onClose }: Props) {
   const [note, setNote] = useState(savedNote ?? "");
   // Eingabefeld für Wohnungen: Entwurf lokal, damit auch Tippen (statt +/−) geht
   const [unitsDraft, setUnitsDraft] = useState(String(units));
@@ -39,13 +41,14 @@ export default function StatusPopup({ building, cat, areaLabel, note: savedNote,
     ? `${building.street} ${building.hnr}`
     : `Gebäude ${building.id}`;
 
-  // Position: der erste Aktions-Knopf liegt direkt unter dem Mauszeiger —
+  // Position (Desktop): der erste Aktions-Knopf liegt direkt unter dem Mauszeiger —
   // so markiert ein natürlicher Doppelklick das Haus (Klick öffnet, Klick trifft).
+  // Auf dem Handy kommt das Fenster stattdessen als Bottom-Sheet von unten (CSS).
   const left = Math.max(8, Math.min(x - 135, window.innerWidth - 620));
   const top = Math.max(8, Math.min(y - 96, window.innerHeight - 420));
 
   return (
-    <div className="status-popup" style={{ left, top }}>
+    <div className="status-popup" style={mobile ? undefined : { left, top }}>
       <div className="popup-head">
         <strong>{title}</strong>
         <button className="x" onClick={onClose}>×</button>
