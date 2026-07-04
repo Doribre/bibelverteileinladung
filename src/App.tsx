@@ -41,10 +41,10 @@ function hasAreas(evs: DemoEvent[]): boolean {
   return evs.some((e) => e.t === "area_created" && !dissolved.has(e.id));
 }
 
-/** Erst das eigene Gebiet einkringeln — Häuser markieren kommt danach. */
+/** Erst das eigene Gebiet einkringeln – Häuser markieren kommt danach. */
 const defaultTool = (evs: DemoEvent[]): Tool => (hasAreas(evs) ? "select" : "lasso");
 
-// Export/Import verwirrt die Tester in der POC-Phase — vorerst ausgeblendet.
+// Export/Import verwirrt die Tester in der POC-Phase – vorerst ausgeblendet.
 // Die Funktionen bleiben im Code, für später einfach auf true stellen.
 const SHOW_IMPORT_EXPORT = false;
 
@@ -128,7 +128,7 @@ export default function App() {
 
   useEffect(() => saveEvents(regionKey, events), [regionKey, events]);
 
-  // Events eines Aufrufs teilen eine Aktionsgruppe — Undo nimmt die ganze Gruppe zurück
+  // Events eines Aufrufs teilen eine Aktionsgruppe – Undo nimmt die ganze Gruppe zurück
   const dispatch = (...evs: DemoEvent[]) => {
     const g = newId("g");
     setEvents((prev) => [...prev, ...evs.map((e) => ({ ...e, g }))]);
@@ -182,13 +182,13 @@ export default function App() {
         const p = JSON.parse(txt);
         const evs = p ? sanitizeEvents(p.events) : null;
         if (!evs) {
-          alert("Datei nicht erkannt oder beschädigt — es wird ein unveränderter Export dieser Anwendung erwartet.");
+          alert("Datei nicht erkannt oder beschädigt – es wird ein unveränderter Export dieser Anwendung erwartet.");
           return;
         }
         const fileRegion: string = typeof p.region === "string" ? p.region : "badgodesberg";
         if (fileRegion !== regionKey) {
           const r = REGIONS.find((x) => x.key === fileRegion);
-          alert(`Diese Datei gehört zum Gebiet „${r?.name ?? fileRegion}" — bitte oben zuerst das Gebiet umschalten und dann erneut importieren.`);
+          alert(`Diese Datei gehört zum Gebiet „${r?.name ?? fileRegion}" – bitte oben zuerst das Gebiet umschalten und dann erneut importieren.`);
           return;
         }
         setEvents(evs);
@@ -236,7 +236,7 @@ export default function App() {
     // geänderte Notiz gehört zur selben Aktion (gemeinsames Undo)
     if (note !== undefined) evs.push({ t: "building_note", buildingId: popup.buildingId, note });
     dispatch(...evs);
-    // Loot-Box-Moment: Blinken + Funken + Bling + Ermutigung — alles in der
+    // Loot-Box-Moment: Blinken + Funken + Bling + Ermutigung – alles in der
     // einheitlichen Statusfarbe (Haus, Blinken, Blase = gleiche Farbfamilie)
     if (status === "verteilt" || status === "gesprochen") {
       const cat: Cat = status === "verteilt" ? "v" : "g";
@@ -315,7 +315,7 @@ export default function App() {
         buildingIds: finalIds,
       });
       dispatch(...evs);
-      setTool("select"); // Gebiet steht — jetzt Häuser markieren
+      setTool("select"); // Gebiet steht – jetzt Häuser markieren
     }
     setStrokes([]);
     setShowNaming(false);

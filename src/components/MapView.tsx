@@ -91,7 +91,7 @@ export default function MapView(props: Props) {
     (window as any).__map = map; // Dev-/Test-Haken (nur Demonstrator)
     map.on("error", (e) => console.warn("Kartenfehler:", (e as any).error?.message ?? e));
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
-    // Karte bleibt immer genordet — Zwei-Finger dient nur dem Zoomen, nicht dem Drehen
+    // Karte bleibt immer genordet – Zwei-Finger dient nur dem Zoomen, nicht dem Drehen
     map.touchZoomRotate.disableRotation();
 
     const updateDraw = (pts: Ring) => {
@@ -145,7 +145,7 @@ export default function MapView(props: Props) {
 
     /**
      * Kreuzt das neue Liniensegment die bisherige Linie, ist das Gebiet gemalt:
-     * Rückgabe der umschlossenen Schleife — aber nur, wenn sie auch Häuser enthält
+     * Rückgabe der umschlossenen Schleife – aber nur, wenn sie auch Häuser enthält
      * (verhindert Auslösen durch winzige versehentliche Kringel).
      */
     const detectLoop = (pts: Ring, p: [number, number]): { ring: Ring; ids: number[] } | null => {
@@ -162,7 +162,7 @@ export default function MapView(props: Props) {
       return null;
     };
 
-    // Wichtig: "style.load" statt "load" — "load" wartet auch auf die Basiskarten-
+    // Wichtig: "style.load" statt "load" – "load" wartet auch auf die Basiskarten-
     // Kacheln des externen Servers; die App-Ebenen (Gebäude, Gebiete) dürfen davon
     // nicht abhängen. Der Style ist inline und damit sofort verfügbar.
     map.on("style.load", () => {
@@ -247,7 +247,7 @@ export default function MapView(props: Props) {
       const pts: Ring = [start];
       let finished = false;
       // Loslassen außerhalb der Karte (Sidebar, Fensterrand) und abgebrochene
-      // Touch-Gesten müssen den Strich ebenfalls beenden — sonst malt er beim
+      // Touch-Gesten müssen den Strich ebenfalls beenden – sonst malt er beim
       // Zurückkehren des Zeigers weiter (Review-Fund #2)
       const winEvents: string[] = moveEvent === "mousemove" ? ["mouseup"] : ["touchend", "touchcancel"];
       const stop = () => {
@@ -359,7 +359,7 @@ export default function MapView(props: Props) {
         "areas-fill"
       );
     }
-    // auf Datenausdehnung zoomen — über 0,5 %-Quantile, damit einzelne Ausreißer
+    // auf Datenausdehnung zoomen – über 0,5 %-Quantile, damit einzelne Ausreißer
     // (z. B. Hamburgs Nordsee-Insel Neuwerk) den Ausschnitt nicht aufziehen
     const xs: number[] = [], ys: number[] = [];
     for (const f of props.buildingsFC.features) {
@@ -460,7 +460,7 @@ export default function MapView(props: Props) {
   }, [props.areas, props.distributors, styleReady]);
 
   // Werkzeugwechsel: nur der Mauszeiger ändert sich.
-  // dragPan bleibt IMMER aktiv — so verschieben zwei Finger die Karte auch im
+  // dragPan bleibt IMMER aktiv – so verschieben zwei Finger die Karte auch im
   // Zeichenmodus (Standard-MapLibre-Verhalten). Das Ein-Finger-Zeichnen wird nicht
   // durch Abschalten von dragPan erreicht, sondern durch preventDefault im
   // touchstart-/mousedown-Handler (unterdrückt das Panning nur für diese eine Geste).
@@ -503,7 +503,7 @@ export default function MapView(props: Props) {
         <button
           className={props.tool === "lasso" ? "active" : ""}
           onClick={() => props.setTool("lasso")}
-          title="Linie um den Bereich ziehen — kreuzt sie sich, ist das Gebiet ausgewählt"
+          title="Linie um den Bereich ziehen – kreuzt sie sich, ist das Gebiet ausgewählt"
         >
           {mobile ? "✏️ Gebiet markieren" : "✏️ Markiere dein Verteil-Gebiet"}
         </button>
@@ -519,7 +519,7 @@ export default function MapView(props: Props) {
         <div className="tool-hint">
           {mobile
             ? "EIN Finger: Linie um dein Gebiet malen (kreuzt sie sich, ist es ausgewählt). ZWEI Finger: Karte verschieben und zoomen."
-            : "Einfach eine Linie um den Bereich malen — sobald sie sich kreuzt, ist das Gebiet ausgewählt. Loslassen schließt ebenfalls."}
+            : "Einfach eine Linie um den Bereich malen – sobald sie sich kreuzt, ist das Gebiet ausgewählt. Loslassen schließt ebenfalls."}
         </div>
       )}
     </div>

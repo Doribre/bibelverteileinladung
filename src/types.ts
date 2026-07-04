@@ -1,4 +1,4 @@
-// Zentrale Typen — Statusmodell siehe Konzept v2, Abschnitt 2:
+// Zentrale Typen – Statusmodell siehe Konzept v2, Abschnitt 2:
 // zwei Dimensionen (Zuteilung × Ergebnis) → vier exklusive Anzeige-Kategorien.
 
 /** Anzeige-Kategorie: u=Unerreicht, z=Zugeteilt, v=Verteilt, g=Gesprochen, n=Nicht zustellbar */
@@ -11,7 +11,7 @@ export interface Building {
   street: string;
   hnr: string;
   plz: string;
-  /** Schwerpunkt [lng, lat] — vorberechnet in der Pipeline */
+  /** Schwerpunkt [lng, lat] – vorberechnet in der Pipeline */
   c: [number, number];
 }
 
@@ -33,7 +33,7 @@ type DemoEventBase =
       t: "building_status";
       buildingId: number;
       status: "verteilt" | "gesprochen" | "offen" | "nicht_zustellbar" | "zustellbar";
-      /** veraltet (frühere Exporte): Notiz bei nicht_zustellbar — wird als building_note übernommen */
+      /** veraltet (frühere Exporte): Notiz bei nicht_zustellbar – wird als building_note übernommen */
       comment?: string;
     }
   | {
@@ -83,7 +83,7 @@ export interface Counts {
   total: number;
   /** Wohnungen/Briefkästen der erreichten Häuser (verteilt + gesprochen) */
   w: number;
-  /** Wohnungen gesamt — Häuser ohne Angabe zählen als 1, also eine Mindestzahl */
+  /** Wohnungen gesamt – Häuser ohne Angabe zählen als 1, also eine Mindestzahl */
   wTotal: number;
 }
 
@@ -112,7 +112,7 @@ export const REGIONS: Region[] = [
   { key: "hamburg", name: "Hamburg (ganze Stadt)", file: "hamburg.geojson" },
 ];
 
-// Füllfarbe je Kategorie — dieselbe Farbe für Haus, Meldung, Button und KPI-Chip.
+// Füllfarbe je Kategorie – dieselbe Farbe für Haus, Meldung, Button und KPI-Chip.
 export const CAT_COLORS: Record<Cat, string> = {
   u: "#9ca3af",
   z: "#3b82f6",

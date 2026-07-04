@@ -1,4 +1,4 @@
-// Kurzer "Bling"-Klang über die Web Audio API — kein Audio-Asset nötig.
+// Kurzer "Bling"-Klang über die Web Audio API – kein Audio-Asset nötig.
 // Läuft nur nach einer Nutzergeste (der Klick auf das Haus ist eine).
 let ctx: AudioContext | null = null;
 
@@ -7,7 +7,7 @@ export function bling(): void {
     if (!ctx) ctx = new AudioContext();
     if (ctx.state === "suspended") void ctx.resume();
     const t = ctx.currentTime;
-    // Zwei aufsteigende Glockentöne (Quinte) — freundlich, kurz, unaufdringlich
+    // Zwei aufsteigende Glockentöne (Quinte) – freundlich, kurz, unaufdringlich
     [880, 1318.5].forEach((freq, i) => {
       const osc = ctx!.createOscillator();
       const gain = ctx!.createGain();
@@ -22,6 +22,6 @@ export function bling(): void {
       osc.stop(start + 0.6);
     });
   } catch {
-    // Ton ist Zugabe, kein Muss — Fehler (z. B. Autoplay-Sperre) still schlucken
+    // Ton ist Zugabe, kein Muss – Fehler (z. B. Autoplay-Sperre) still schlucken
   }
 }

@@ -25,6 +25,6 @@ export function saveEvents(region: string, events: DemoEvent[]): void {
   try {
     sessionStorage.setItem(keyFor(region), JSON.stringify(events));
   } catch {
-    // Speichern ist Komfort, kein Muss — Fehler (z. B. volles Storage) nicht eskalieren
+    // Speichern ist Komfort, kein Muss – Fehler (z. B. volles Storage) nicht eskalieren
   }
 }

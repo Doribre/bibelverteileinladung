@@ -57,7 +57,7 @@ export default function AreaDialog({
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h2>Neues Verteilgebiet</h2>
         <p>
-          <strong>{freeCount}</strong> Häuser ausgewählt — los geht's!
+          <strong>{freeCount}</strong> Häuser ausgewählt – los geht's!
         </p>
 
         <label>

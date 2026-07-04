@@ -11,15 +11,15 @@ Live: https://doribre.github.io/bibelverteileinladung/
 
 ## Bedienung
 
-- **KPI-Leiste (oben):** Unerreicht / Zugeteilt / Verteilt / Persönlich gesprochen —
+- **KPI-Leiste (oben):** Unerreicht / Zugeteilt / Verteilt / Persönlich gesprochen –
   vier exklusive Kategorien, Summe = Zählbasis (adressierte Gebäude ohne Nebengebäude).
-- **„Markiere dein Verteil-Gebiet":** Linie um den Bereich malen — kreuzt sie sich,
+- **„Markiere dein Verteil-Gebiet":** Linie um den Bereich malen – kreuzt sie sich,
   ist das Gebiet ausgewählt (Loslassen schließt ebenfalls). Enthaltene Häuser
   (Mittelpunkt-Regel) werden ausgewählt, Straßenliste wird abgeleitet, Gebiet kann
   benannt und einem Verteiler zugeordnet werden.
 - **Verteiler:** frei wählbare Namen, existieren nur in der Browser-Sitzung
-  (Demonstrator — später ersetzt durch Bibel TV Login, PS#0001).
-- **Haus anklicken** (Werkzeug „Auswählen"): Status setzen — Verteilt, Persönlich
+  (Demonstrator – später ersetzt durch Bibel TV Login, PS#0001).
+- **Haus anklicken** (Werkzeug „Auswählen"): Status setzen – Verteilt, Persönlich
   gesprochen, Zurücksetzen, Nicht zustellbar (mit Gebäude-Notiz; Häuser bleiben
   in der Zählung).
 - **Gamification:** Beim Markieren blinkt das Haus, Funken sprühen, ein kurzer
@@ -42,7 +42,7 @@ npm run build                             # Produktions-Build nach dist/
 - **Ereignisprotokoll:** Jede Handlung ist ein unveränderliches Ereignis
   (`src/state/events.ts`); der Zustand ist immer eine Ableitung. Undo = letztes
   Ereignis entfernen. Dasselbe Format wandert in Stufe 2 auf den Server.
-- **Datenschutz:** Es gibt keine personenbezogenen Daten — keine Bewohner, keine
+- **Datenschutz:** Es gibt keine personenbezogenen Daten – keine Bewohner, keine
   Freitexte an Häusern, kein „abgelehnt"-Status (Konzept v2, Abschnitt 2.3/10).
 - **Basiskarte:** Für den Demonstrator OSM-Rasterkacheln (tile.openstreetmap.org,
   Attribution erforderlich, nur geringe Last). Vor breiterem Einsatz auf selbst

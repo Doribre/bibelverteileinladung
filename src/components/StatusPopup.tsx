@@ -33,7 +33,7 @@ export default function StatusPopup({ building, cat, areaLabel, note: savedNote,
   };
   const noteChanged = note.trim() !== (savedNote ?? "");
 
-  // Status setzen — eine gerade geänderte Notiz wandert mit in dieselbe Aktion
+  // Status setzen – eine gerade geänderte Notiz wandert mit in dieselbe Aktion
   const send = (status: Parameters<Props["onSet"]>[0]) =>
     onSet(status, noteChanged ? note.trim() : undefined);
 
@@ -41,7 +41,7 @@ export default function StatusPopup({ building, cat, areaLabel, note: savedNote,
     ? `${building.street} ${building.hnr}`
     : `Gebäude ${building.id}`;
 
-  // Position (Desktop): der erste Aktions-Knopf liegt direkt unter dem Mauszeiger —
+  // Position (Desktop): der erste Aktions-Knopf liegt direkt unter dem Mauszeiger –
   // so markiert ein natürlicher Doppelklick das Haus (Klick öffnet, Klick trifft).
   // Auf dem Handy kommt das Fenster stattdessen als Bottom-Sheet von unten (CSS).
   const left = Math.max(8, Math.min(x - 135, window.innerWidth - 620));
@@ -110,7 +110,7 @@ export default function StatusPopup({ building, cat, areaLabel, note: savedNote,
             💾 Notiz speichern
           </button>
         )}
-        <span className="hint">Nur Angaben zum Gebäude — nichts über Bewohner.</span>
+        <span className="hint">Nur Angaben zum Gebäude – nichts über Bewohner.</span>
       </div>
     </div>
   );

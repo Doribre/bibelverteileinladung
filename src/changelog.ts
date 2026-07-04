@@ -9,7 +9,7 @@ export interface ChangelogEntry {
 }
 
 /**
- * Versionshistorie — oberste Version ist die aktuellste.
+ * Versionshistorie – oberste Version ist die aktuellste.
  * Konvention: Nummern zählen fortlaufend um 0.1 hoch, keine Nummer wird
  * ohne ausdrückliche Anweisung übersprungen.
  */
@@ -65,7 +65,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       "Bugfix: markiertes Haus bleibt nicht mehr kurz gelb, sondern zeigt sofort seine endgültige Farbe.",
       "Einheitliche Statusfarben: Haus, Meldung, Button und Aufleuchten sind je Status dieselbe Farbe (Verteilt = grün, Persönlich gesprochen = gold).",
       "Ein Finger zeichnet das Gebiet, zwei Finger verschieben und zoomen die Karte.",
-      "Linienweises Rückgängig beim Zeichnen (»Letzte Linie zurück«) — mehrere Striche möglich.",
+      "Linienweises Rückgängig beim Zeichnen (»Letzte Linie zurück«) – mehrere Striche möglich.",
       "Vereinfachter Start-Dialog: nur zwei vorausgefüllte Felder, ein Klick zum Loslegen, keine Tastatur beim Öffnen.",
       "Bessere Lesbarkeit auf dem Handy; Motivationsmeldung erscheint immer im sichtbaren Bereich.",
     ],

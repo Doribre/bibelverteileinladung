@@ -64,7 +64,7 @@ export default function Sidebar({
       .filter((a) => a.distributorId === id)
       .reduce((s, a) => s + a.memberIds.length, 0);
 
-  // Fortschritt über die eigenen (= alle) Gebiete — Kern der Handy-Kurzansicht
+  // Fortschritt über die eigenen (= alle) Gebiete – Kern der Handy-Kurzansicht
   const agg = derived.areas.reduce(
     (s, a) => ({
       done: s.done + a.done,
@@ -122,7 +122,7 @@ export default function Sidebar({
           </div>
           {derived.distributors.length === 0 && (
             <p className="empty">
-              Noch keine Verteiler. Namen anlegen — oder direkt über „Markiere dein
+              Noch keine Verteiler. Namen anlegen – oder direkt über „Markiere dein
               Verteil-Gebiet" einen Bereich umfahren und den Namen dort vergeben.
             </p>
           )}
@@ -196,7 +196,7 @@ export default function Sidebar({
                     value={a.distributorId ?? ""}
                     onChange={(e) => onAssignArea(a.id, e.target.value || null)}
                   >
-                    <option value="">— kein Verteiler —</option>
+                    <option value="">– kein Verteiler –</option>
                     {derived.distributors.map((d2) => (
                       <option key={d2.id} value={d2.id}>
                         {d2.name}

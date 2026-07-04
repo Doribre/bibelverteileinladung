@@ -15,12 +15,12 @@ export default function InfoPage({ onClose }: { onClose: () => void }) {
             <p>
               <strong>Bibel-Einladungs-Planer</strong> – bereitgestellt von Bibel TV NEXT MISSION. Ziel der Kampagne ist es,
               möglichst <em>jeden Haushalt</em> zu erreichen: persönlich klingeln und die Bibel im
-              Gespräch übergeben, sonst mit einem Gruß in den Briefkasten — und Gebiete, die so
+              Gespräch übergeben, sonst mit einem Gruß in den Briefkasten – und Gebiete, die so
               nicht erreicht werden, später per Post.
             </p>
             <p>
               Diese Web-App hilft Freiwilligen, Gebiete untereinander aufzuteilen und festzuhalten,
-              welche Häuser schon bedient sind — damit jeder Haushalt genau einmal erreicht wird,
+              welche Häuser schon bedient sind – damit jeder Haushalt genau einmal erreicht wird,
               ohne Lücken und ohne doppelte Besuche.
             </p>
             <p className="info-note">
@@ -36,18 +36,18 @@ export default function InfoPage({ onClose }: { onClose: () => void }) {
               <li>Freiwillige teilen sich Gebiete auf und markieren die Häuser vor Ort selbst.</li>
               <li>Die Gebäudedaten stammen aus OpenStreetMap (offen und kostenlos).</li>
               <li>
-                Wie viele Haushalte/Briefkästen in einem Haus sind, wissen wir vorab nicht sicher —
+                Wie viele Haushalte/Briefkästen in einem Haus sind, wissen wir vorab nicht sicher –
                 die Freiwilligen erfassen und korrigieren das direkt am Haus.
               </li>
               <li>
-                Es werden bewusst <strong>keine personenbezogenen Daten</strong> erhoben — keine
+                Es werden bewusst <strong>keine personenbezogenen Daten</strong> erhoben – keine
                 Namen, keine Bewohner, nur Orte und Gebäude.
               </li>
             </ul>
           </section>
 
           <section>
-            <h3>Was dieser Demonstrator (noch) nicht kann — und warum</h3>
+            <h3>Was dieser Demonstrator (noch) nicht kann – und warum</h3>
             <ul>
               <li>
                 <strong>Kein Login, kein Server:</strong> Alles läuft nur im Browser, der Stand lebt
@@ -86,7 +86,7 @@ export default function InfoPage({ onClose }: { onClose: () => void }) {
               </li>
               <li>
                 <strong>Verzögerung nach Updates:</strong> Neue Versionen erscheinen wegen
-                Zwischenspeicherung bis zu ~10 Minuten später — dann hilft ein erzwungenes Neuladen
+                Zwischenspeicherung bis zu ~10 Minuten später – dann hilft ein erzwungenes Neuladen
                 (Strg+F5 bzw. Seite neu laden).
               </li>
             </ul>
@@ -101,7 +101,7 @@ export default function InfoPage({ onClose }: { onClose: () => void }) {
               </li>
               <li>
                 Bewusst gibt es <strong>keinen „abgelehnt"-Status</strong> und keine Notizen über
-                Bewohner — um Aussagen über einzelne Personen zu vermeiden.
+                Bewohner – um Aussagen über einzelne Personen zu vermeiden.
               </li>
             </ul>
           </section>

@@ -100,7 +100,7 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
   }
 
   // Anzeige-Kategorie je Gebäude (nur Abweichungen vom Standard 'u');
-  // 'n' übersteuert nur die FARBE — gezählt wird das Haus weiterhin normal
+  // 'n' übersteuert nur die FARBE – gezählt wird das Haus weiterhin normal
   const cat = new Map<number, Cat>();
   for (const b of nz) cat.set(b, "n");
   for (const [b, v] of ergebnis) {
@@ -115,7 +115,7 @@ export function derive(events: DemoEvent[], buildings: Map<number, Building>): D
     if (isAssigned(b)) cat.set(b, "z"); // zugeteilt nur, wenn wirklich jemandem zugeordnet
   }
 
-  // Zählung: nicht_zustellbar nimmt NICHTS aus der Zählbasis — das Haus zählt
+  // Zählung: nicht_zustellbar nimmt NICHTS aus der Zählbasis – das Haus zählt
   // nach seinem Grundzustand weiter (zugeteilt oder unerreicht)
   const unitsOf = (b: number) => units.get(b) ?? 1;
   let z = 0, v = 0, g = 0, w = 0;
@@ -177,7 +177,7 @@ const STATUS_VALUES = new Set(["verteilt", "gesprochen", "offen", "nicht_zustell
 
 /**
  * Validiert fremde/gespeicherte Ereignislisten (Import-Datei, sessionStorage).
- * Gibt null zurück, wenn irgendetwas nicht der erwarteten Form entspricht —
+ * Gibt null zurück, wenn irgendetwas nicht der erwarteten Form entspricht –
  * eine manipulierte Datei darf die App nicht crashen.
  */
 export function sanitizeEvents(raw: unknown): DemoEvent[] | null {

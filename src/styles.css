@@ -10,7 +10,7 @@ header { background: #0f172a; color: #fff; flex-shrink: 0; }
 .title-block { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .title-block strong { font-size: 15px; }
-/* deutlich sichtbares "Prototyp"-Kennzeichen — immer sichtbar, auch mobil */
+/* deutlich sichtbares "Prototyp"-Kennzeichen – immer sichtbar, auch mobil */
 .proto-badge { background: #f59e0b; color: #451a03; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
 .title-block .subtitle { color: #94a3b8; font-size: 12.5px; max-width: 760px; }
 .region-select { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; border-radius: 6px; padding: 4px 8px; font-size: 13px; margin-right: 6px; }
@@ -129,7 +129,7 @@ button.x:hover { color: #dc2626; }
   .titlebar { padding: 8px 10px 2px; flex-direction: column; align-items: stretch; gap: 6px; }
   .title-block strong { font-size: 14px; max-width: none; white-space: normal; line-height: 1.25; }
   .title-block .subtitle { display: none; }
-  /* Gebietswahl links, Bedienknöpfe (↶ und ⋮) am rechten Rand — ⋮ ganz rechts */
+  /* Gebietswahl links, Bedienknöpfe (↶ und ⋮) am rechten Rand – ⋮ ganz rechts */
   .actions { position: relative; justify-content: flex-start; align-items: center; width: 100%; }
   .actions .region-select { margin-right: auto; margin-left: 0; }
   .actions button { margin-left: 4px; padding: 6px 10px; font-size: 14px; }
@@ -137,7 +137,7 @@ button.x:hover { color: #dc2626; }
   .menu-drop { position: absolute; right: 0; top: 36px; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 4px; z-index: 40; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
   .menu-drop button { margin: 0; text-align: left; }
 
-  /* KPI: schlanke, seitlich wischbare Chips — Farben = Kartenlegende */
+  /* KPI: schlanke, seitlich wischbare Chips – Farben = Kartenlegende */
   .kpi { gap: 12px; padding: 6px 10px 8px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .kpi::-webkit-scrollbar { display: none; }
   .kpi-item { flex-shrink: 0; gap: 6px; }
