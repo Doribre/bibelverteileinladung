@@ -11,6 +11,7 @@ import Sidebar from "./components/Sidebar";
 import AreaDialog from "./components/AreaDialog";
 import StatusPopup from "./components/StatusPopup";
 import Celebration, { type CelebrationData } from "./components/Celebration";
+import InfoPage from "./components/InfoPage";
 import { useIsMobile } from "./useIsMobile";
 
 /** Ein gezeichneter Linien-Strich mit den darin liegenden Häusern */
@@ -60,6 +61,7 @@ export default function App() {
   const mobile = useIsMobile();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   // Gebäudedaten des gewählten Gebiets laden
   useEffect(() => {
@@ -407,6 +409,7 @@ export default function App() {
               <button onClick={() => setMenuOpen((o) => !o)} title="Mehr">⋮</button>
             ) : (
               <>
+                <button onClick={() => setInfoOpen(true)}>ℹ️ Info</button>
                 <button onClick={exportState} disabled={events.length === 0}>Export</button>
                 <button onClick={() => fileInputRef.current?.click()}>Import</button>
                 <button className="danger" onClick={reset} disabled={events.length === 0}>Zurücksetzen</button>
@@ -425,6 +428,7 @@ export default function App() {
             />
             {mobile && menuOpen && (
               <div className="menu-drop" onClick={() => setMenuOpen(false)}>
+                <button onClick={() => setInfoOpen(true)}>ℹ️ Info & Versionen</button>
                 <button onClick={exportState} disabled={events.length === 0}>Export</button>
                 <button onClick={() => fileInputRef.current?.click()}>Import</button>
                 <button className="danger" onClick={reset} disabled={events.length === 0}>Zurücksetzen</button>
@@ -515,6 +519,7 @@ export default function App() {
           onFocusArea={(id) => setFocusArea({ id, ts: Date.now() })}
         />
       </main>
+      {infoOpen && <InfoPage onClose={() => setInfoOpen(false)} />}
     </div>
   );
 }
