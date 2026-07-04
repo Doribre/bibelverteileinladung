@@ -24,8 +24,6 @@ interface Props {
   onSelection: (ids: number[], polygon: Ring) => void;
   onBuildingClick: (id: number, x: number, y: number) => void;
   onBackgroundClick: () => void;
-  onUndo: () => void;
-  canUndo: boolean;
 }
 
 const EMPTY_FC: any = { type: "FeatureCollection", features: [] };
@@ -525,16 +523,6 @@ export default function MapView(props: Props) {
             ? "EIN Finger: Linie um dein Gebiet malen (kreuzt sie sich, ist es ausgewählt). ZWEI Finger: Karte verschieben und zoomen."
             : "Einfach eine Linie um den Bereich malen — sobald sie sich kreuzt, ist das Gebiet ausgewählt. Loslassen schließt ebenfalls."}
         </div>
-      )}
-      {mobile && props.tool === "lasso" && (
-        <button
-          className="fab-undo"
-          onClick={props.onUndo}
-          disabled={!props.canUndo}
-          title="Letzte Aktion rückgängig"
-        >
-          ↶ Rückgängig
-        </button>
       )}
     </div>
   );

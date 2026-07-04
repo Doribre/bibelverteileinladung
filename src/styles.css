@@ -94,6 +94,18 @@ button.x:hover { color: #dc2626; }
 .modal-actions button { padding: 7px 14px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 14px; }
 .modal-actions button.primary { background: #0f172a; color: #fff; border-color: #0f172a; }
 .modal-actions button.primary:disabled { opacity: 0.4; cursor: default; }
+/* weniger prominenter Zweitknopf (z. B. „Letzte Linie zurück") */
+.modal-actions button.ghost { background: none; border: none; color: #64748b; padding: 7px 8px; }
+.modal-actions button.ghost:hover:not(:disabled) { color: #0f172a; text-decoration: underline; }
+.modal-actions button.ghost:disabled { opacity: 0.35; cursor: default; }
+.modal-actions { justify-content: space-between; }
+
+/* Schwebende Auswahl-Leiste, während Striche vorliegen (Dialog ausgeblendet) */
+.select-bar { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #cbd5e1; border-radius: 999px; padding: 8px 10px 8px 16px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22); }
+.select-bar .select-count { font-size: 14px; font-weight: 700; color: #0f172a; white-space: nowrap; }
+.select-bar button { border: 1px solid #cbd5e1; background: #fff; border-radius: 999px; padding: 8px 12px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.select-bar button.primary { background: #16a34a; color: #fff; border-color: #16a34a; font-weight: 700; }
+.select-bar button.primary:disabled { opacity: 0.4; cursor: default; }
 
 /* Status-Popup am Haus */
 .status-popup { position: absolute; z-index: 15; background: #fff; border-radius: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25); width: 270px; padding: 10px 12px; }
@@ -132,9 +144,8 @@ button.x:hover { color: #dc2626; }
   .tool-hint { top: 48px; left: 8px; right: 8px; max-width: none; font-size: 11.5px; }
   .legend { display: none; }
 
-  /* Schwebender Rückgängig-Knopf beim Zeichnen — gut sichtbar über dem Sheet */
-  .fab-undo { position: absolute; right: 12px; bottom: 92px; z-index: 20; background: #fff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 999px; padding: 11px 18px; font-size: 15px; font-weight: 700; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25); cursor: pointer; }
-  .fab-undo:disabled { opacity: 0.45; }
+  /* Auswahl-Leiste auf dem Handy tiefer legen, damit sie über dem Sheet sitzt */
+  .select-bar { bottom: 92px; left: 8px; right: 8px; }
 
   /* Seitenleiste wird zum Bottom-Sheet mit Fortschritts-Griff */
   .sidebar.sheet { position: fixed; left: 0; right: 0; bottom: 0; width: auto; z-index: 25; border-left: none; border-top: 1px solid #e2e8f0; border-radius: 16px 16px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18); max-height: 78dvh; transition: max-height 0.3s ease; }

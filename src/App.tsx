@@ -13,7 +13,8 @@ import StatusPopup from "./components/StatusPopup";
 import Celebration, { type CelebrationData } from "./components/Celebration";
 import { useIsMobile } from "./useIsMobile";
 
-interface Selection {
+/** Ein gezeichneter Linien-Strich mit den darin liegenden Häusern */
+interface Stroke {
   ids: number[];
   polygon: Ring;
 }
@@ -48,7 +49,9 @@ export default function App() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [events, setEvents] = useState<DemoEvent[]>(() => loadEvents(regionFromUrl()));
   const [tool, setTool] = useState<Tool>(() => defaultTool(loadEvents(regionFromUrl())));
-  const [selection, setSelection] = useState<Selection | null>(null);
+  // Angesammelte Linien-Striche vor dem Anlegen; "letzte Linie zurück" poppt den letzten.
+  const [strokes, setStrokes] = useState<Stroke[]>([]);
+  const [showNaming, setShowNaming] = useState(false);
   const [popup, setPopup] = useState<PopupState | null>(null);
   const [focusArea, setFocusArea] = useState<{ id: string; ts: number } | null>(null);
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
@@ -83,7 +86,8 @@ export default function App() {
     if (key === regionKey) return;
     setRegionKey(key);
     setEvents(loadEvents(key));
-    setSelection(null);
+    setStrokes([]);
+    setShowNaming(false);
     setPopup(null);
     setCelebration(null);
     setSheetOpen(false);
@@ -134,14 +138,16 @@ export default function App() {
       return prev.slice(0, i);
     });
     setPopup(null);
-    setSelection(null);
+    setStrokes([]);
+    setShowNaming(false);
   };
 
   const reset = () => {
     if (confirm(`Demo für „${region.name}" wirklich zurücksetzen? Alle Markierungen, Gebiete und Namen dieses Gebiets gehen verloren.`)) {
       setEvents([]);
       setPopup(null);
-      setSelection(null);
+      setStrokes([]);
+      setShowNaming(false);
       setTool("lasso"); // ohne Gebiete: wieder mit dem Einkringeln beginnen
     }
   };
@@ -180,16 +186,36 @@ export default function App() {
         }
         setEvents(evs);
         setPopup(null);
-        setSelection(null);
+        setStrokes([]);
+        setShowNaming(false);
       })
       .catch(() => alert("Datei konnte nicht gelesen werden."));
   };
 
+  // Union aller angesammelten Striche = aktuelle Vorauswahl (auf der Karte blau)
+  const pendingIds = useMemo(() => {
+    const s = new Set<number>();
+    for (const st of strokes) for (const id of st.ids) s.add(id);
+    return [...s];
+  }, [strokes]);
+  // freie (noch keinem Gebiet zugeteilte) Häuser der Vorauswahl
+  const freeCount = useMemo(
+    () => pendingIds.filter((id) => !derived.assignedArea.has(id)).length,
+    [pendingIds, derived]
+  );
+
   const onSelection = (ids: number[], polygon: Ring) => {
-    if (ids.length === 0) return; // leere Auswahl: Werkzeug bleibt aktiv, kein Dialog
-    setSelection({ ids, polygon });
+    if (ids.length === 0) return; // leerer Strich: Werkzeug bleibt aktiv, kein Dialog
+    setStrokes((prev) => [...prev, { ids, polygon }]); // Strich anhängen (Stack)
+    setShowNaming(true); // Namen-Dialog anzeigen
     setPopup(null);
-    setTool("select");
+    // Werkzeug bleibt "lasso", damit weitere Linien hinzugezeichnet werden können
+  };
+
+  // „Letzte Linie zurück": obersten Strich entfernen und Karte wieder freigeben
+  const undoLastStroke = () => {
+    setStrokes((prev) => prev.slice(0, -1));
+    setShowNaming(false);
   };
 
   const onBuildingClick = (id: number, x: number, y: number) => setPopup({ buildingId: id, x, y });
@@ -231,7 +257,6 @@ export default function App() {
   };
 
   const createArea = (opts: { areaName: string; missionarName: string }) => {
-    if (!selection) return;
     const evs: DemoEvent[] = [];
     // Verteiler mit gleichem Namen wiederverwenden statt Duplikate anzulegen
     const existing = derived.distributors.find(
@@ -249,21 +274,43 @@ export default function App() {
         color: nextColor(derived.distributors.length),
       });
     }
-    // Nur freie Häuser übernehmen (keine aus fremden Gebieten abwerben)
-    const finalIds = selection.ids.filter((id) => !derived.assignedArea.has(id));
+    // Nur freie Häuser der gesamten Vorauswahl (alle Striche) übernehmen
+    const finalIds = pendingIds.filter((id) => !derived.assignedArea.has(id));
     if (finalIds.length > 0) {
+      // Umriss = Hüllrechteck aller ausgewählten Häuser (mehrere Striche zusammengefasst)
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const id of finalIds) {
+        const c = buildings.get(id)?.c;
+        if (!c) continue;
+        if (c[0] < minX) minX = c[0];
+        if (c[0] > maxX) maxX = c[0];
+        if (c[1] < minY) minY = c[1];
+        if (c[1] > maxY) maxY = c[1];
+      }
+      const pad = 0.0004;
+      const polygon: Ring =
+        strokes.length === 1
+          ? strokes[0].polygon // ein Strich → exakte gezeichnete Form
+          : [
+              [minX - pad, minY - pad],
+              [maxX + pad, minY - pad],
+              [maxX + pad, maxY + pad],
+              [minX - pad, maxY + pad],
+              [minX - pad, minY - pad],
+            ];
       evs.push({
         t: "area_created",
         id: newId("a"),
         name: opts.areaName,
         distributorId: distId,
-        polygon: selection.polygon,
+        polygon,
         buildingIds: finalIds,
       });
       dispatch(...evs);
       setTool("select"); // Gebiet steht — jetzt Häuser markieren
     }
-    setSelection(null);
+    setStrokes([]);
+    setShowNaming(false);
   };
 
   const popupData = useMemo(() => {
@@ -320,9 +367,11 @@ export default function App() {
         const ids = [...buildings.values()]
           .filter((b) => b.c[0] >= w && b.c[0] <= e2 && b.c[1] >= s && b.c[1] <= n)
           .map((b) => b.id);
-        if (ids.length > 0) setSelection({ ids, polygon: ring });
+        if (ids.length > 0) onSelection(ids, ring);
         return ids.length;
       },
+      pendingCount: freeCount,
+      strokeCount: strokes.length,
     };
   });
 
@@ -402,14 +451,12 @@ export default function App() {
             distributors={derived.distributors}
             tool={tool}
             setTool={setTool}
-            selectionIds={selection?.ids ?? null}
+            selectionIds={pendingIds}
             focusArea={focusArea}
             flash={flash}
             onSelection={onSelection}
             onBuildingClick={onBuildingClick}
             onBackgroundClick={() => setPopup(null)}
-            onUndo={undo}
-            canUndo={events.length > 0}
           />
           {popupData && popup && (
             <StatusPopup
@@ -428,18 +475,25 @@ export default function App() {
             />
           )}
           {celebration && <Celebration data={celebration} onDone={() => setCelebration(null)} />}
-          {selection && (
+          {/* Vorauswahl vorhanden, aber Dialog ausgeblendet → schwebende Leiste:
+              Karte bleibt sichtbar, „letzte Linie zurück" oder weiterzeichnen */}
+          {pendingIds.length > 0 && !showNaming && (
+            <div className="select-bar">
+              <span className="select-count">🏠 {freeCount} markiert</span>
+              <button onClick={undoLastStroke}>↩ Letzte Linie zurück</button>
+              <button className="primary" onClick={() => setShowNaming(true)} disabled={freeCount === 0}>
+                ✓ Fertig
+              </button>
+            </div>
+          )}
+          {showNaming && pendingIds.length > 0 && (
             <AreaDialog
-              selection={selection}
-              buildings={buildings}
-              derived={derived}
+              freeCount={freeCount}
+              canUndoLine={strokes.length > 0}
               defaultMissionar={`Verteil-Missionar_${derived.distributors.length + 1}`}
               defaultArea={`Verteilgebiet_${derived.areas.length + 1}`}
-              onCancel={() => {
-                setSelection(null);
-                // noch kein Gebiet vorhanden → zurück in den Zeichenmodus
-                if (derived.areas.length === 0) setTool("lasso");
-              }}
+              onUndoLine={undoLastStroke}
+              onCancel={() => setShowNaming(false)}
               onCreate={createArea}
             />
           )}
