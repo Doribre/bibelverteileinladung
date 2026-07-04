@@ -20,7 +20,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     time: "18:18",
     title: "Klarere Kennzeichnung",
     changes: [
-      "Titel: »Bibel TV NEXT MISSION – Bibelverteil-Planer« (»Planer« statt »Plan«, da noch in Arbeit).",
+      "Titel: »Bibel TV NEXT MISSION – Bibeleinladungs-Planer« (Werkzeug, daher »Planer«).",
       "Deutliche Kennzeichnung als »Prototyp« (eingeschränkte Demo-Version), mit Versionsnummer im Kopfbereich.",
     ],
   },

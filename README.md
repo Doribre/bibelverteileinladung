@@ -1,4 +1,4 @@
-# Bibel TV NEXT MISSION – Bibelverteil-Planer (Prototyp)
+# Bibel TV NEXT MISSION – Bibeleinladungs-Planer (Prototyp)
 
 Koordinations-Website für die Bibelverteilaktion (Demonstrator, Stufe 1 nach
 Konzept v2): läuft komplett im Browser, ohne Backend und ohne Login.
