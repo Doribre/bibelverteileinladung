@@ -209,8 +209,8 @@ export default function Sidebar({
           </ul>
         </section>
         <footer>
-          Demonstrator (Stufe 1) · Gebäudedaten: © OpenStreetMap-Mitwirkende (ODbL) ·
-          Stand lebt nur in dieser Browser-Sitzung — dauerhaft sichern über „Export".
+          Eine Initiative von Bibel TV NEXT MISSION · Gebäudedaten © OpenStreetMap-Mitwirkende
+          (ODbL) · Prototyp – der Stand lebt nur in dieser Browser-Sitzung.
         </footer>
       </div>
     </aside>

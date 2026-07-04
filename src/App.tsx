@@ -389,11 +389,11 @@ export default function App() {
         <div className="titlebar">
           <div className="title-block">
             <div className="title-row">
-              <strong>Bibel TV NEXT MISSION – Bibel-Einladungs-Planer</strong>
+              <strong>Bibel-Einladungs-Planer</strong>
               <span className="proto-badge">Prototyp · v{APP_VERSION}</span>
             </div>
             <span className="subtitle">
-              Eingeschränkte Demo-Version zur Veranschaulichung — noch nicht die fertige App.
+              Eingeschränkte Demo-Version zur Veranschaulichung – noch nicht die fertige App.
               Markiere das Gebiet, in dem du verteilen möchtest, schreib deinen Namen dazu, und
               markiere dann jedes Haus, das schon eine Bibel bekommen hat.
             </span>

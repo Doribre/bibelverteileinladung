@@ -13,7 +13,7 @@ export default function InfoPage({ onClose }: { onClose: () => void }) {
           <section>
             <h3>Worum geht es?</h3>
             <p>
-              <strong>Bibel TV NEXT MISSION – Bibel-Einladungs-Planer.</strong> Ziel der Kampagne ist es,
+              <strong>Bibel-Einladungs-Planer</strong> – eine Initiative von Bibel TV NEXT MISSION. Ziel der Kampagne ist es,
               möglichst <em>jeden Haushalt</em> zu erreichen: persönlich klingeln und die Bibel im
               Gespräch übergeben, sonst mit einem Gruß in den Briefkasten — und Gebiete, die so
               nicht erreicht werden, später per Post.
@@ -52,7 +52,7 @@ export default function InfoPage({ onClose }: { onClose: () => void }) {
               <li>
                 <strong>Kein Login, kein Server:</strong> Alles läuft nur im Browser, der Stand lebt
                 nur in dieser Sitzung. <em>Warum:</em> So lässt sich die Idee sofort und ohne
-                Server-/Datenschutzaufwand zeigen. Zum Sichern gibt es „Export".
+                Server-/Datenschutzaufwand zeigen.
               </li>
               <li>
                 <strong>Kein gemeinsamer Live-Stand:</strong> Zwei Personen sehen sich nicht
