@@ -389,7 +389,7 @@ export default function App() {
         <div className="titlebar">
           <div className="title-block">
             <div className="title-row">
-              <strong>Bibel TV NEXT MISSION – Bibeleinladungs-Planer</strong>
+              <strong>Bibel TV NEXT MISSION – Bibel-Einladungs-Planer</strong>
               <span className="proto-badge">Prototyp · v{APP_VERSION}</span>
             </div>
             <span className="subtitle">
