@@ -13,6 +13,7 @@ import StatusPopup from "./components/StatusPopup";
 import Celebration, { type CelebrationData } from "./components/Celebration";
 import InfoPage from "./components/InfoPage";
 import { useIsMobile } from "./useIsMobile";
+import { APP_VERSION } from "./changelog";
 
 /** Ein gezeichneter Linien-Strich mit den darin liegenden Häusern */
 interface Stroke {
@@ -388,8 +389,8 @@ export default function App() {
         <div className="titlebar">
           <div className="title-block">
             <div className="title-row">
-              <strong>Bibel TV NEXT MISSION – Bibelverteil-Plan</strong>
-              <span className="proto-badge">Prototyp</span>
+              <strong>Bibel TV NEXT MISSION – Bibelverteil-Planer</strong>
+              <span className="proto-badge">Prototyp · v{APP_VERSION}</span>
             </div>
             <span className="subtitle">
               Eingeschränkte Demo-Version zur Veranschaulichung — noch nicht die fertige App.

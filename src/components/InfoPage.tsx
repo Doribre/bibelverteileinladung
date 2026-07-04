@@ -13,7 +13,7 @@ export default function InfoPage({ onClose }: { onClose: () => void }) {
           <section>
             <h3>Worum geht es?</h3>
             <p>
-              <strong>Bibel TV NEXT MISSION – Bibelverteil-Plan.</strong> Ziel der Kampagne ist es,
+              <strong>Bibel TV NEXT MISSION – Bibelverteil-Planer.</strong> Ziel der Kampagne ist es,
               möglichst <em>jeden Haushalt</em> zu erreichen: persönlich klingeln und die Bibel im
               Gespräch übergeben, sonst mit einem Gruß in den Briefkasten — und Gebiete, die so
               nicht erreicht werden, später per Post.
