@@ -406,6 +406,8 @@ export default function App() {
             onSelection={onSelection}
             onBuildingClick={onBuildingClick}
             onBackgroundClick={() => setPopup(null)}
+            onUndo={undo}
+            canUndo={events.length > 0}
           />
           {popupData && popup && (
             <StatusPopup

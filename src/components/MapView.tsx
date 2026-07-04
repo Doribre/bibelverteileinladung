@@ -24,6 +24,8 @@ interface Props {
   onSelection: (ids: number[], polygon: Ring) => void;
   onBuildingClick: (id: number, x: number, y: number) => void;
   onBackgroundClick: () => void;
+  onUndo: () => void;
+  canUndo: boolean;
 }
 
 const EMPTY_FC: any = { type: "FeatureCollection", features: [] };
@@ -90,6 +92,8 @@ export default function MapView(props: Props) {
     (window as any).__map = map; // Dev-/Test-Haken (nur Demonstrator)
     map.on("error", (e) => console.warn("Kartenfehler:", (e as any).error?.message ?? e));
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    // Karte bleibt immer genordet — Zwei-Finger dient nur dem Zoomen, nicht dem Drehen
+    map.touchZoomRotate.disableRotation();
 
     const updateDraw = (pts: Ring) => {
       const src = map.getSource("draw") as maplibregl.GeoJSONSource | undefined;
@@ -255,6 +259,13 @@ export default function MapView(props: Props) {
       };
       const move = (ev: any) => {
         if (finished) return;
+        // Zweiter Finger während des Zeichnens → Strich abbrechen, damit die
+        // gewohnte Zwei-Finger-Zoom-Geste übernehmen kann (kein Fehl-Gebiet)
+        if (ev.points && ev.points.length > 1) {
+          stop();
+          clearDraw();
+          return;
+        }
         const p: [number, number] = [ev.lngLat.lng, ev.lngLat.lat];
         const loop = detectLoop(pts, p);
         if (loop) {
@@ -282,6 +293,9 @@ export default function MapView(props: Props) {
     });
     map.on("touchstart", (e) => {
       if (propsRef.current.tool !== "lasso") return;
+      // Nur EIN Finger malt. Zwei (oder mehr) Finger → nicht abfangen, damit die
+      // gewohnte Auseinanderziehen/Zusammenführen-Geste die Karte zoomt.
+      if (e.points && e.points.length > 1) return;
       e.preventDefault();
       startStroke([e.lngLat.lng, e.lngLat.lat], "touchmove", "touchend");
     });
@@ -506,9 +520,19 @@ export default function MapView(props: Props) {
       {props.tool === "lasso" && (
         <div className="tool-hint">
           {mobile
-            ? "Mit dem Finger eine Linie um dein Gebiet malen — kreuzt sie sich, ist es ausgewählt."
+            ? "Mit EINEM Finger eine Linie um dein Gebiet malen — kreuzt sie sich, ist es ausgewählt. Mit zwei Fingern zoomen."
             : "Einfach eine Linie um den Bereich malen — sobald sie sich kreuzt, ist das Gebiet ausgewählt. Loslassen schließt ebenfalls."}
         </div>
+      )}
+      {mobile && props.tool === "lasso" && (
+        <button
+          className="fab-undo"
+          onClick={props.onUndo}
+          disabled={!props.canUndo}
+          title="Letzte Aktion rückgängig"
+        >
+          ↶ Rückgängig
+        </button>
       )}
     </div>
   );
