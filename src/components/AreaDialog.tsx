@@ -61,7 +61,7 @@ export default function AreaDialog({
         </label>
         <div className="modal-actions">
           <button className="ghost" disabled={!canUndoLine} onClick={onUndoLine}>
-            ↩ Letzte Linie zurück
+            ↩ Zurück
           </button>
           <button className="primary" disabled={!canSubmit} onClick={submit}>
             Los geht's ✏️

@@ -43,6 +43,10 @@ function hasAreas(evs: DemoEvent[]): boolean {
 /** Erst das eigene Gebiet einkringeln — Häuser markieren kommt danach. */
 const defaultTool = (evs: DemoEvent[]): Tool => (hasAreas(evs) ? "select" : "lasso");
 
+// Export/Import verwirrt die Tester in der POC-Phase — vorerst ausgeblendet.
+// Die Funktionen bleiben im Code, für später einfach auf true stellen.
+const SHOW_IMPORT_EXPORT = false;
+
 export default function App() {
   const [regionKey, setRegionKey] = useState<string>(regionFromUrl);
   const region = REGIONS.find((r) => r.key === regionKey) ?? REGIONS[0];
@@ -410,8 +414,12 @@ export default function App() {
             ) : (
               <>
                 <button onClick={() => setInfoOpen(true)}>ℹ️ Info</button>
-                <button onClick={exportState} disabled={events.length === 0}>Export</button>
-                <button onClick={() => fileInputRef.current?.click()}>Import</button>
+                {SHOW_IMPORT_EXPORT && (
+                  <>
+                    <button onClick={exportState} disabled={events.length === 0}>Export</button>
+                    <button onClick={() => fileInputRef.current?.click()}>Import</button>
+                  </>
+                )}
                 <button className="danger" onClick={reset} disabled={events.length === 0}>Zurücksetzen</button>
               </>
             )}
@@ -429,8 +437,12 @@ export default function App() {
             {mobile && menuOpen && (
               <div className="menu-drop" onClick={() => setMenuOpen(false)}>
                 <button onClick={() => setInfoOpen(true)}>ℹ️ Info & Versionen</button>
-                <button onClick={exportState} disabled={events.length === 0}>Export</button>
-                <button onClick={() => fileInputRef.current?.click()}>Import</button>
+                {SHOW_IMPORT_EXPORT && (
+                  <>
+                    <button onClick={exportState} disabled={events.length === 0}>Export</button>
+                    <button onClick={() => fileInputRef.current?.click()}>Import</button>
+                  </>
+                )}
                 <button className="danger" onClick={reset} disabled={events.length === 0}>Zurücksetzen</button>
               </div>
             )}
