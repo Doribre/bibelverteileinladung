@@ -29,3 +29,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+          # force_orphan erzeugt bei jedem Lauf einen frischen gh-pages-Stand
+          # (auch ohne Inhaltsänderung) — so lässt sich ein vorübergehend
+          # fehlgeschlagener GitHub-Pages-Deploy zuverlässig erneut anstoßen.
+          force_orphan: true
