@@ -1,0 +1,18 @@
+# Baut die Vite-App und veröffentlicht sie über GitLab Pages.
+# Sobald diese Datei existiert, wird sie statt der Auto-DevOps-Pipeline genutzt.
+image: node:22
+
+pages:
+  stage: deploy
+  script:
+    - npm ci
+    - npm run build
+    # GitLab Pages liefert den Ordner "public/" aus — dorthin das Build-Ergebnis legen.
+    # Vite hat die Daten aus public/ bereits nach dist/ kopiert.
+    - rm -rf public
+    - mv dist public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
