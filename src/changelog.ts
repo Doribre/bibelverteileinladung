@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.6";
+export const APP_VERSION = "0.7";
 
 export interface ChangelogEntry {
   version: string;
@@ -14,6 +14,16 @@ export interface ChangelogEntry {
  * ohne ausdrückliche Anweisung übersprungen.
  */
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.7",
+    date: "2026-07-04",
+    time: "18:18",
+    title: "Klarere Kennzeichnung",
+    changes: [
+      "Titel gekürzt auf »Bibel TV NEXT MISSION – Bibelverteil-Plan«.",
+      "Deutliche Kennzeichnung als »Prototyp« (eingeschränkte Demo-Version) im Kopfbereich.",
+    ],
+  },
   {
     version: "0.6",
     date: "2026-07-04",

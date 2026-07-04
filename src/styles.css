@@ -8,7 +8,10 @@ body { font-family: system-ui, "Segoe UI", sans-serif; color: #1e293b; }
 header { background: #0f172a; color: #fff; flex-shrink: 0; }
 .titlebar { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px 2px; flex-wrap: wrap; gap: 6px; }
 .title-block { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .title-block strong { font-size: 15px; }
+/* deutlich sichtbares "Prototyp"-Kennzeichen — immer sichtbar, auch mobil */
+.proto-badge { background: #f59e0b; color: #451a03; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
 .title-block .subtitle { color: #94a3b8; font-size: 12.5px; max-width: 760px; }
 .region-select { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; border-radius: 6px; padding: 4px 8px; font-size: 13px; margin-right: 6px; }
 .actions { display: flex; }
