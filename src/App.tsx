@@ -516,6 +516,7 @@ export default function App() {
               canUndoLine={strokes.length > 0}
               defaultMissionar={`Verteil-Missionar_${derived.distributors.length + 1}`}
               defaultArea={`Verteilgebiet_${derived.areas.length + 1}`}
+              distributors={derived.distributors}
               onUndoLine={undoLastStroke}
               onCancel={() => setShowNaming(false)}
               onCreate={createArea}

@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.7";
+export const APP_VERSION = "0.8";
 
 export interface ChangelogEntry {
   version: string;
@@ -14,6 +14,16 @@ export interface ChangelogEntry {
  * ohne ausdrückliche Anweisung übersprungen.
  */
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.8",
+    date: "2026-07-04",
+    time: "18:43",
+    title: "Verteiler-Auswahl im Dialog",
+    changes: [
+      "Beim Anlegen eines Gebiets werden bereits vorhandene Verteiler vorgeschlagen (zuletzt angelegter vorausgewählt).",
+      "Per Dropdown wechselbar; »Neuen Namen anlegen« bleibt möglich. Ohne vorhandene Verteiler wie bisher direktes Textfeld.",
+    ],
+  },
   {
     version: "0.7",
     date: "2026-07-04",

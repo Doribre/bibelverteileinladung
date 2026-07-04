@@ -5,34 +5,51 @@ interface Props {
   freeCount: number;
   /** ob ein Strich zum Zurücknehmen da ist */
   canUndoLine: boolean;
-  /** Vorschlag „Verteil-Missionar_N" */
+  /** Vorschlag „Verteil-Missionar_N" für einen neuen Namen */
   defaultMissionar: string;
   /** Vorschlag „Verteilgebiet_N" */
   defaultArea: string;
+  /** bereits angelegte Verteiler (aus der Seitenleiste oder früheren Gebieten) */
+  distributors: { id: string; name: string }[];
   onUndoLine: () => void;
   onCreate: (opts: { areaName: string; missionarName: string }) => void;
   onCancel: () => void;
 }
 
+const NEW = "__new";
+
 /**
- * POC-Dialog: zwei vorausgefüllte Felder (Verteiler + Gebietsname), Ein-Klick-Start.
- * Kein Autofokus → auf dem Handy klappt keine Tastatur auf. Dazu ein weniger
- * prominenter „Letzte Linie zurück"-Knopf für den Vermalt-Fall.
+ * POC-Dialog. Verteiler-Auswahl:
+ * - Gibt es schon Verteiler → Dropdown, vorausgewählt der zuletzt angelegte;
+ *   umschaltbar auf „Neuen Namen anlegen" (Textfeld).
+ * - Gibt es keinen → einfaches Textfeld mit Vorschlag „Verteil-Missionar_N".
+ * Kein Autofokus im Grundzustand → auf dem Handy klappt keine Tastatur auf.
  */
 export default function AreaDialog({
   freeCount,
   canUndoLine,
   defaultMissionar,
   defaultArea,
+  distributors,
   onUndoLine,
   onCreate,
   onCancel,
 }: Props) {
-  const [missionar, setMissionar] = useState(defaultMissionar);
+  const hasDistributors = distributors.length > 0;
   const [area, setArea] = useState(defaultArea);
-  const canSubmit = freeCount > 0 && missionar.trim() !== "" && area.trim() !== "";
+  // Vorauswahl: zuletzt angelegter Verteiler; ohne Verteiler direkt „neu"
+  const [choice, setChoice] = useState<string>(
+    hasDistributors ? distributors[distributors.length - 1].id : NEW
+  );
+  const [newName, setNewName] = useState(defaultMissionar);
+
+  const missionarName = (): string => {
+    if (choice === NEW) return newName.trim();
+    return distributors.find((d) => d.id === choice)?.name ?? "";
+  };
+  const canSubmit = freeCount > 0 && area.trim() !== "" && missionarName() !== "";
   const submit = () => {
-    if (canSubmit) onCreate({ areaName: area.trim(), missionarName: missionar.trim() });
+    if (canSubmit) onCreate({ areaName: area.trim(), missionarName: missionarName() });
   };
 
   return (
@@ -42,14 +59,39 @@ export default function AreaDialog({
         <p>
           <strong>{freeCount}</strong> Häuser ausgewählt — los geht's!
         </p>
+
         <label>
           Wer verteilt hier?
-          <input
-            value={missionar}
-            onChange={(e) => setMissionar(e.target.value)}
-            onFocus={(e) => e.target.select()}
-          />
+          {hasDistributors ? (
+            <select value={choice} onChange={(e) => setChoice(e.target.value)}>
+              {distributors.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+              <option value={NEW}>+ Neuen Namen anlegen …</option>
+            </select>
+          ) : (
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onFocus={(e) => e.target.select()}
+            />
+          )}
         </label>
+
+        {hasDistributors && choice === NEW && (
+          <label>
+            Neuer Name
+            <input
+              autoFocus
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onFocus={(e) => e.target.select()}
+            />
+          </label>
+        )}
+
         <label>
           Name des Gebiets
           <input
@@ -59,6 +101,7 @@ export default function AreaDialog({
             onKeyDown={(e) => e.key === "Enter" && submit()}
           />
         </label>
+
         <div className="modal-actions">
           <button className="ghost" disabled={!canUndoLine} onClick={onUndoLine}>
             ↩ Zurück
