@@ -230,30 +230,32 @@ export default function App() {
     dispatch({ t: "building_units", buildingId: popup.buildingId, units });
   };
 
-  const createArea = (opts: {
-    name: string;
-    distributorId: string | null;
-    newDistributorName?: string;
-    moveAssigned: boolean;
-  }) => {
+  const createArea = (opts: { areaName: string; missionarName: string }) => {
     if (!selection) return;
     const evs: DemoEvent[] = [];
-    let distId = opts.distributorId;
-    if (opts.newDistributorName) {
+    // Verteiler mit gleichem Namen wiederverwenden statt Duplikate anzulegen
+    const existing = derived.distributors.find(
+      (d) => d.name.trim().toLowerCase() === opts.missionarName.toLowerCase()
+    );
+    let distId: string;
+    if (existing) {
+      distId = existing.id;
+    } else {
       distId = newId("d");
       evs.push({
         t: "distributor_added",
         id: distId,
-        name: opts.newDistributorName,
+        name: opts.missionarName,
         color: nextColor(derived.distributors.length),
       });
     }
-    const finalIds = selection.ids.filter((id) => opts.moveAssigned || !derived.assignedArea.has(id));
+    // Nur freie Häuser übernehmen (keine aus fremden Gebieten abwerben)
+    const finalIds = selection.ids.filter((id) => !derived.assignedArea.has(id));
     if (finalIds.length > 0) {
       evs.push({
         t: "area_created",
         id: newId("a"),
-        name: opts.name,
+        name: opts.areaName,
         distributorId: distId,
         polygon: selection.polygon,
         buildingIds: finalIds,
@@ -431,7 +433,8 @@ export default function App() {
               selection={selection}
               buildings={buildings}
               derived={derived}
-              defaultName={`Gebiet ${events.filter((e) => e.t === "area_created").length + 1}`}
+              defaultMissionar={`Verteil-Missionar_${derived.distributors.length + 1}`}
+              defaultArea={`Verteilgebiet_${derived.areas.length + 1}`}
               onCancel={() => {
                 setSelection(null);
                 // noch kein Gebiet vorhanden → zurück in den Zeichenmodus

@@ -463,12 +463,14 @@ export default function MapView(props: Props) {
     });
   }, [props.areas, props.distributors, styleReady]);
 
-  // Werkzeugwechsel: Kartenverhalten anpassen
+  // Werkzeugwechsel: nur der Mauszeiger ändert sich.
+  // dragPan bleibt IMMER aktiv — so verschieben zwei Finger die Karte auch im
+  // Zeichenmodus (Standard-MapLibre-Verhalten). Das Ein-Finger-Zeichnen wird nicht
+  // durch Abschalten von dragPan erreicht, sondern durch preventDefault im
+  // touchstart-/mousedown-Handler (unterdrückt das Panning nur für diese eine Geste).
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    if (props.tool === "lasso") map.dragPan.disable();
-    else map.dragPan.enable();
     map.getCanvas().style.cursor = props.tool === "select" ? "" : "crosshair";
   }, [props.tool]);
 
@@ -520,7 +522,7 @@ export default function MapView(props: Props) {
       {props.tool === "lasso" && (
         <div className="tool-hint">
           {mobile
-            ? "Mit EINEM Finger eine Linie um dein Gebiet malen — kreuzt sie sich, ist es ausgewählt. Mit zwei Fingern zoomen."
+            ? "EIN Finger: Linie um dein Gebiet malen (kreuzt sie sich, ist es ausgewählt). ZWEI Finger: Karte verschieben und zoomen."
             : "Einfach eine Linie um den Bereich malen — sobald sie sich kreuzt, ist das Gebiet ausgewählt. Loslassen schließt ebenfalls."}
         </div>
       )}

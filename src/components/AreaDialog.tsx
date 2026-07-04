@@ -1,127 +1,75 @@
 import { useMemo, useState } from "react";
 import type { Building, Derived, Ring } from "../types";
-import { summarizeStreets } from "../streets";
 
 interface Props {
   selection: { ids: number[]; polygon: Ring };
   buildings: Map<number, Building>;
   derived: Derived;
-  defaultName: string;
-  onCreate: (opts: {
-    name: string;
-    distributorId: string | null;
-    newDistributorName?: string;
-    moveAssigned: boolean;
-  }) => void;
+  /** Vorschlag „Verteil-Missionar_N" */
+  defaultMissionar: string;
+  /** Vorschlag „Verteilgebiet_N" */
+  defaultArea: string;
+  onCreate: (opts: { areaName: string; missionarName: string }) => void;
   onCancel: () => void;
 }
 
+/**
+ * POC-Dialog: bewusst nur zwei vorausgefüllte Felder (Verteiler + Gebietsname).
+ * Kein Autofokus → auf dem Handy klappt keine Tastatur auf; der Nutzer bestätigt
+ * die Vorschläge mit einem Klick und legt sofort los. Tippt er in ein Feld,
+ * erscheint die Tastatur wie gewohnt.
+ */
 export default function AreaDialog({
   selection,
   buildings,
   derived,
-  defaultName,
+  defaultMissionar,
+  defaultArea,
   onCreate,
   onCancel,
 }: Props) {
-  const [name, setName] = useState(defaultName);
-  const [choice, setChoice] = useState<string>(
-    derived.distributors.length > 0 ? derived.distributors[0].id : "__new"
-  );
-  const [newName, setNewName] = useState("");
-  const [moveAssigned, setMoveAssigned] = useState(false);
+  const [missionar, setMissionar] = useState(defaultMissionar);
+  const [area, setArea] = useState(defaultArea);
 
-  const selBuildings = useMemo(
-    () => selection.ids.map((id) => buildings.get(id)).filter((b): b is Building => !!b),
-    [selection, buildings]
-  );
-  const streets = useMemo(() => summarizeStreets(selBuildings), [selBuildings]);
-  const alreadyAssigned = useMemo(
-    () => selection.ids.filter((id) => derived.assignedArea.has(id)),
+  // Wie viele der ausgewählten Häuser sind noch frei (nicht in anderem Gebiet)?
+  const freeCount = useMemo(
+    () => selection.ids.filter((id) => !derived.assignedArea.has(id)).length,
     [selection, derived]
   );
-  const effective = selection.ids.length - (moveAssigned ? 0 : alreadyAssigned.length);
-  const canSubmit =
-    effective > 0 && name.trim() !== "" && (choice !== "__new" || newName.trim() !== "");
+  const canSubmit = freeCount > 0 && missionar.trim() !== "" && area.trim() !== "";
+
+  const submit = () => {
+    if (canSubmit) onCreate({ areaName: area.trim(), missionarName: missionar.trim() });
+  };
 
   return (
     <div className="modal-backdrop" onClick={onCancel}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Neues Gebiet</h2>
+        <h2>Neues Verteilgebiet</h2>
         <p>
-          <strong>{selection.ids.length}</strong> Häuser ausgewählt
-          {alreadyAssigned.length > 0 && (
-            <>
-              {" "}— davon <strong>{alreadyAssigned.length}</strong> bereits zugeteilt
-            </>
-          )}
+          <strong>{freeCount}</strong> Häuser ausgewählt — los geht's!
         </p>
-        {alreadyAssigned.length > 0 && (
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={moveAssigned}
-              onChange={(e) => setMoveAssigned(e.target.checked)}
-            />
-            Bereits zugeteilte Häuser in dieses Gebiet verschieben
-          </label>
-        )}
-        <div className="streets">
-          {streets.slice(0, 8).map((s) => (
-            <div key={s.street}>
-              <span>
-                {s.street}
-                {s.range && ` ${s.range}`}
-              </span>
-              <span className="hint">{s.count}</span>
-            </div>
-          ))}
-          {streets.length > 8 && (
-            <div className="hint">… und {streets.length - 8} weitere Straßen</div>
-          )}
-        </div>
         <label>
-          Gebietsname
-          <input value={name} onChange={(e) => setName(e.target.value)} />
+          Wer verteilt hier?
+          <input
+            value={missionar}
+            onChange={(e) => setMissionar(e.target.value)}
+            onFocus={(e) => e.target.select()}
+          />
         </label>
         <label>
-          Verteiler
-          <select value={choice} onChange={(e) => setChoice(e.target.value)}>
-            <option value="">— noch niemand —</option>
-            {derived.distributors.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-            <option value="__new">+ Neuer Name …</option>
-          </select>
+          Name des Gebiets
+          <input
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => e.key === "Enter" && submit()}
+          />
         </label>
-        {choice === "__new" && (
-          <label>
-            Neuer Verteiler-Name
-            <input
-              autoFocus
-              value={newName}
-              placeholder="z. B. Team Nord"
-              onChange={(e) => setNewName(e.target.value)}
-            />
-          </label>
-        )}
         <div className="modal-actions">
           <button onClick={onCancel}>Abbrechen</button>
-          <button
-            className="primary"
-            disabled={!canSubmit}
-            onClick={() =>
-              onCreate({
-                name: name.trim(),
-                distributorId: choice && choice !== "__new" ? choice : null,
-                newDistributorName: choice === "__new" ? newName.trim() : undefined,
-                moveAssigned,
-              })
-            }
-          >
-            Gebiet anlegen ({effective} Häuser)
+          <button className="primary" disabled={!canSubmit} onClick={submit}>
+            Los geht's ✏️
           </button>
         </div>
       </div>
