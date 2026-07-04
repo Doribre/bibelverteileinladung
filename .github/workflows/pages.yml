@@ -6,14 +6,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,13 +25,21 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # Veröffentlicht dist/ auf den gh-pages-Branch — GitHub Pages
-      # aktiviert sich für diesen Branch automatisch, ohne Einstellungen.
-      - uses: peaceiris/actions-gh-pages@v4
+      # Offizieller Pages-Weg: veröffentlicht direkt aus diesem Workflow
+      # (kein separater, zuletzt unzuverlässiger "pages build and deployment"-Schritt).
+      - uses: actions/configure-pages@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          # force_orphan erzeugt bei jedem Lauf einen frischen gh-pages-Stand
-          # (auch ohne Inhaltsänderung) — so lässt sich ein vorübergehend
-          # fehlgeschlagener GitHub-Pages-Deploy zuverlässig erneut anstoßen.
-          force_orphan: true
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
