@@ -474,13 +474,15 @@ export default function App() {
               onClose={() => setPopup(null)}
             />
           )}
-          {celebration && <Celebration data={celebration} onDone={() => setCelebration(null)} />}
+          {celebration && (
+            <Celebration data={celebration} mobile={mobile} onDone={() => setCelebration(null)} />
+          )}
           {/* Vorauswahl vorhanden, aber Dialog ausgeblendet → schwebende Leiste:
               Karte bleibt sichtbar, „letzte Linie zurück" oder weiterzeichnen */}
           {pendingIds.length > 0 && !showNaming && (
             <div className="select-bar">
-              <span className="select-count">🏠 {freeCount} markiert</span>
-              <button onClick={undoLastStroke}>↩ Letzte Linie zurück</button>
+              <span className="select-count">🏠 {freeCount}{mobile ? "" : " markiert"}</span>
+              <button onClick={undoLastStroke}>↩ {mobile ? "Zurück" : "Letzte Linie zurück"}</button>
               <button className="primary" onClick={() => setShowNaming(true)} disabled={freeCount === 0}>
                 ✓ Fertig
               </button>
