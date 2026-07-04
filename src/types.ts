@@ -112,12 +112,31 @@ export const REGIONS: Region[] = [
   { key: "hamburg", name: "Hamburg (ganze Stadt)", file: "hamburg.geojson" },
 ];
 
+// Füllfarbe je Kategorie — dieselbe Farbe für Haus, Meldung, Button und KPI-Chip.
 export const CAT_COLORS: Record<Cat, string> = {
   u: "#9ca3af",
   z: "#3b82f6",
   v: "#16a34a",
   g: "#eab308",
   n: "#374151",
+};
+
+// Kontrast-Textfarbe auf der jeweiligen Füllfarbe (für farbige Buttons/Blasen)
+export const CAT_TEXT: Record<Cat, string> = {
+  u: "#ffffff",
+  z: "#ffffff",
+  v: "#ffffff",
+  g: "#451a03",
+  n: "#ffffff",
+};
+
+// Hellere Tönung derselben Farbe fürs Aufleuchten (Loot-Box-Blinken)
+export const CAT_FLASH: Record<Cat, string> = {
+  u: "#e5e7eb",
+  z: "#93c5fd",
+  v: "#86efac",
+  g: "#fde047",
+  n: "#9ca3af",
 };
 
 export const CAT_LABELS: Record<Cat, string> = {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Building, Cat } from "../types";
-import { CAT_COLORS, CAT_LABELS } from "../types";
+import { CAT_COLORS, CAT_LABELS, CAT_TEXT } from "../types";
 
 interface Props {
   building: Building;
@@ -59,21 +59,21 @@ export default function StatusPopup({ building, cat, areaLabel, note: savedNote,
       </div>
       <div className="popup-actions">
         {cat !== "v" && (
-          <button style={{ borderColor: CAT_COLORS.v }} onClick={() => send("verteilt")}>
+          <button className="filled" style={{ background: CAT_COLORS.v, color: CAT_TEXT.v }} onClick={() => send("verteilt")}>
             📖 Verteilt
           </button>
         )}
         {cat !== "g" && (
-          <button style={{ borderColor: CAT_COLORS.g }} onClick={() => send("gesprochen")}>
+          <button className="filled" style={{ background: CAT_COLORS.g, color: CAT_TEXT.g }} onClick={() => send("gesprochen")}>
             💬 Persönlich gesprochen
           </button>
         )}
         {cat !== "n" ? (
-          <button style={{ borderColor: CAT_COLORS.n }} onClick={() => send("nicht_zustellbar")}>
+          <button className="filled" style={{ background: CAT_COLORS.n, color: CAT_TEXT.n }} onClick={() => send("nicht_zustellbar")}>
             🚫 Nicht zustellbar
           </button>
         ) : (
-          <button style={{ borderColor: CAT_COLORS.n }} onClick={() => send("zustellbar")}>
+          <button className="filled" style={{ background: CAT_COLORS.n, color: CAT_TEXT.n }} onClick={() => send("zustellbar")}>
             ✅ Wieder zustellbar
           </button>
         )}

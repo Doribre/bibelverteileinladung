@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Building, Cat, DemoEvent, Ring } from "./types";
-import { CAT_COLORS, REGIONS } from "./types";
+import { CAT_COLORS, CAT_FLASH, CAT_TEXT, REGIONS } from "./types";
 import { derive, newId, nextColor, sanitizeEvents } from "./state/events";
 import { loadEvents, saveEvents } from "./state/storage";
 import { randomEncouragement } from "./encouragements";
@@ -55,7 +55,7 @@ export default function App() {
   const [popup, setPopup] = useState<PopupState | null>(null);
   const [focusArea, setFocusArea] = useState<{ id: string; ts: number } | null>(null);
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
-  const [flash, setFlash] = useState<{ id: number; ts: number } | null>(null);
+  const [flash, setFlash] = useState<{ id: number; ts: number; color: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mobile = useIsMobile();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -229,18 +229,19 @@ export default function App() {
     // geänderte Notiz gehört zur selben Aktion (gemeinsames Undo)
     if (note !== undefined) evs.push({ t: "building_note", buildingId: popup.buildingId, note });
     dispatch(...evs);
-    // Loot-Box-Moment: Blinken + Funken + Bling + Ermutigung (in der Statusfarbe)
+    // Loot-Box-Moment: Blinken + Funken + Bling + Ermutigung — alles in der
+    // einheitlichen Statusfarbe (Haus, Blinken, Blase = gleiche Farbfamilie)
     if (status === "verteilt" || status === "gesprochen") {
+      const cat: Cat = status === "verteilt" ? "v" : "g";
       bling();
-      setFlash({ id: popup.buildingId, ts: Date.now() });
-      const isVerteilt = status === "verteilt";
+      setFlash({ id: popup.buildingId, ts: Date.now(), color: CAT_FLASH[cat] });
       setCelebration({
         id: newId("c"),
         x: popup.x,
         y: popup.y,
         message: randomEncouragement(),
-        bg: isVerteilt ? CAT_COLORS.v : CAT_COLORS.g,
-        fg: isVerteilt ? "#ffffff" : "#451a03",
+        bg: CAT_COLORS[cat],
+        fg: CAT_TEXT[cat],
       });
     }
     setPopup(null);

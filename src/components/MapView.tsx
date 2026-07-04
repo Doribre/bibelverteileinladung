@@ -19,8 +19,8 @@ interface Props {
   setTool: (t: Tool) => void;
   selectionIds: number[] | null;
   focusArea: { id: string; ts: number } | null;
-  /** Loot-Box-Blinken des zuletzt markierten Hauses */
-  flash: { id: number; ts: number } | null;
+  /** Loot-Box-Blinken des zuletzt markierten Hauses (color = status-passende Blink-Farbe) */
+  flash: { id: number; ts: number; color: string } | null;
   onSelection: (ids: number[], polygon: Ring) => void;
   onBuildingClick: (id: number, x: number, y: number) => void;
   onBackgroundClick: () => void;
@@ -28,11 +28,12 @@ interface Props {
 
 const EMPTY_FC: any = { type: "FeatureCollection", features: [] };
 
-// Statusfarbe mit Blink-Übersteuerung (feature-state "flash")
+// Statusfarbe mit Blink-Übersteuerung: während des Blinkens die (status-passende)
+// flashColor, sonst die endgültige Kategorie-Farbe.
 const COLOR_EXPR: any = [
   "case",
   ["boolean", ["feature-state", "flash"], false],
-  "#ffe066",
+  ["coalesce", ["feature-state", "flashColor"], "#ffe066"],
   [
     "match",
     ["coalesce", ["feature-state", "cat"], "u"],
@@ -379,30 +380,27 @@ export default function MapView(props: Props) {
     setBldReady(true);
   }, [styleReady, props.buildingsFC]);
 
-  // Loot-Box-Blinken: markiertes Haus 3× aufleuchten lassen
+  // Loot-Box-Blinken: markiertes Haus 3× in der Statusfarbe aufleuchten lassen.
+  // Muster endet bewusst auf AUS, damit das Haus danach seine endgültige
+  // Kategorie-Farbe zeigt (Bugfix: vorher blieb es auf der Blink-Farbe hängen).
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !bldReady || !props.flash) return;
-    const id = props.flash.id;
-    const timers: number[] = [];
-    for (let i = 0; i < 7; i++) {
-      timers.push(
-        window.setTimeout(() => {
-          try {
-            map.setFeatureState({ source: "bld", id }, { flash: i % 2 === 0 });
-          } catch {
-            /* Quelle ggf. gerade getauscht */
-          }
-        }, i * 160)
-      );
-    }
+    const { id, color } = props.flash;
+    const pattern = [true, false, true, false, true, false]; // letzter Schritt = aus
+    const set = (state: object) => {
+      try {
+        map.setFeatureState({ source: "bld", id }, state);
+      } catch {
+        /* Quelle ggf. gerade getauscht */
+      }
+    };
+    const timers = pattern.map((on, i) =>
+      window.setTimeout(() => set(on ? { flash: true, flashColor: color } : { flash: false }), i * 150)
+    );
     return () => {
       timers.forEach(clearTimeout);
-      try {
-        map.setFeatureState({ source: "bld", id }, { flash: false });
-      } catch {
-        /* s. o. */
-      }
+      set({ flash: false });
     };
   }, [props.flash, bldReady]);
 
