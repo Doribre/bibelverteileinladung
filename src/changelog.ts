@@ -1,17 +1,33 @@
-export const APP_VERSION = "0.9";
+export const APP_VERSION = "0.5";
 
 export interface ChangelogEntry {
   version: string;
   date: string;
+  time: string;
   title: string;
   changes: string[];
 }
 
-/** Versionshistorie — oberste Version ist die aktuellste. */
+/**
+ * Versionshistorie — oberste Version ist die aktuellste.
+ * Konvention: Nummern zählen fortlaufend um 0.1 hoch, keine Nummer wird
+ * ohne ausdrückliche Anweisung übersprungen.
+ */
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "0.9",
+    version: "0.5",
     date: "2026-07-04",
+    time: "16:54",
+    title: "Infoseite & Versionshistorie",
+    changes: [
+      "Neue Infoseite über das Menü: Projektbeschreibung, unsere Annahmen, alle Grenzen des Demonstrators mit Begründung und eine kurze Datenschutz-Einordnung.",
+      "Versionshistorie mit Datum und Uhrzeit; fortlaufende Versionsnummern.",
+    ],
+  },
+  {
+    version: "0.4",
+    date: "2026-07-04",
+    time: "16:29",
     title: "Feinschliff & Bugfix",
     changes: [
       "Bugfix: markiertes Haus bleibt nicht mehr kurz gelb, sondern zeigt sofort seine endgültige Farbe.",
@@ -23,8 +39,9 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
-    version: "0.5",
+    version: "0.3",
     date: "2026-07-03",
+    time: "21:38",
     title: "Handy-Bedienung & Wohnungszählung",
     changes: [
       "Vollbild-Karte auf dem Handy mit hochziehbarem Fortschritts-Bereich unten.",
@@ -37,6 +54,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     version: "0.2",
     date: "2026-07-03",
+    time: "14:38",
     title: "NEXT-MISSION-Ausbau",
     changes: [
       "Neuer Titel: Schau in die Bibel / Bibel TV NEXT MISSION Bibelverteil-Plan.",
@@ -48,6 +66,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     version: "0.1",
     date: "2026-07-03",
+    time: "11:13",
     title: "Erste Version",
     changes: [
       "Demonstrator mit Pilotgebiet Bonn-Bad Godesberg (Gebäude aus OpenStreetMap).",

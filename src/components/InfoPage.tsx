@@ -114,7 +114,7 @@ export default function InfoPage({ onClose }: { onClose: () => void }) {
                   <div className="cl-head">
                     <span className="cl-version">v{e.version}</span>
                     <span className="cl-title">{e.title}</span>
-                    <span className="cl-date">{e.date}</span>
+                    <span className="cl-date">{e.date} · {e.time} Uhr</span>
                   </div>
                   <ul>
                     {e.changes.map((c, i) => (
