@@ -1,6 +1,6 @@
 # Bibel-Einladungs-Planer (Prototyp)
 
-*Eine Initiative von Bibel TV NEXT MISSION.*
+*Bereitgestellt von Bibel TV NEXT MISSION.*
 
 Koordinations-Website für die Bibelverteilaktion (Demonstrator, Stufe 1 nach
 Konzept v2): läuft komplett im Browser, ohne Backend und ohne Login.

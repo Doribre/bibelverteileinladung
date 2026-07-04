@@ -13,7 +13,7 @@ export default function InfoPage({ onClose }: { onClose: () => void }) {
           <section>
             <h3>Worum geht es?</h3>
             <p>
-              <strong>Bibel-Einladungs-Planer</strong> – eine Initiative von Bibel TV NEXT MISSION. Ziel der Kampagne ist es,
+              <strong>Bibel-Einladungs-Planer</strong> – bereitgestellt von Bibel TV NEXT MISSION. Ziel der Kampagne ist es,
               möglichst <em>jeden Haushalt</em> zu erreichen: persönlich klingeln und die Bibel im
               Gespräch übergeben, sonst mit einem Gruß in den Briefkasten — und Gebiete, die so
               nicht erreicht werden, später per Post.

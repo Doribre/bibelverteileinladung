@@ -209,7 +209,7 @@ export default function Sidebar({
           </ul>
         </section>
         <footer>
-          Eine Initiative von Bibel TV NEXT MISSION · Gebäudedaten © OpenStreetMap-Mitwirkende
+          Bereitgestellt von Bibel TV NEXT MISSION · Gebäudedaten © OpenStreetMap-Mitwirkende
           (ODbL) · Prototyp – der Stand lebt nur in dieser Browser-Sitzung.
         </footer>
       </div>
